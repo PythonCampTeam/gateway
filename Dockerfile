@@ -7,6 +7,7 @@ COPY rpc /service/rpc
 COPY run.sh /service
 COPY run_rpc.sh /service
 WORKDIR /service
+
 RUN chmod +x /service/run.sh
 RUN chmod +x /service/run_rpc.sh
 
