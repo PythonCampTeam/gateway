@@ -10,4 +10,5 @@ done
 
 # Run the service
 
-hug -f service/gateway_class.py
+#hug -f service/gateway_class.py
+uwsgi --http 0.0.0.0:8000 --wsgi-file service/server.py --callable __hug_wsgi__
