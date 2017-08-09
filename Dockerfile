@@ -17,5 +17,5 @@ RUN apt-get update && apt-get install -y \
 RUN /bin/bash -c "pip3 install -r /service/requirements/base.txt"
 
 
-CMD /service/run.sh
+#CMD /service/run.sh
 #CMD ["nameko","run" "/service/rpc/service_hello"]

@@ -6,11 +6,15 @@ volumes:
 services:
   web_base:
     build: .
+
+    ports:
+      - "8000:8000"
     networks:
+      - front
       - backend
     external_links:
       - rabbit-day7:rabbit
-#    command: ./run_rpc.sh
+    command: ./run.sh
 
     environment:
         RABBIT_PASSWORD: "guest"
@@ -18,25 +22,6 @@ services:
         RABBIT_HOST: "rabbit"
         RABBIT_PORT: "5672"
         RABBIT_MANAGEMENT_PORT: "15672"
-
-  web:
-    extends: web_base
-    ports:
-      - "8000:8000"
-    networks:
-      - front
-#    command: ./run.sh
-
-  rpc:
-    extends: web_base
-    ports:
-      - "8001:8001"
-    networks:
-      - backend
-    command: ./run_rpc.sh
-
-   # command: sphinx-autobuild docs sphinx-docs -H 0.0.0.0 -p 8001
-
 
 networks:
   backend:
