@@ -1,7 +1,6 @@
 import hug
 from nameko.standalone.rpc import ClusterRpcProxy
-
-CONFIG = {'AMQP_URI': "amqp://guest:guest@rabbit"}
+from config.settings.common.security import *
 
 
 class Products(object):
@@ -14,6 +13,6 @@ class Products(object):
 
     @hug.object.get('/api/products', examples='name=NoteBook&category=Dell')
     def products(self, name: str):
-        with ClusterRpcProxy(CONFIG) as rpc:
+        with ClusterRpcProxy(AMQP_CONFIG) as rpc:
             hello = rpc.greeting_service2.hello(name=name)
         return {name: hello}
