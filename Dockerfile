@@ -5,7 +5,6 @@ ADD config /service/config
 
 #ARG PY_ENV
 
-COPY rpc /service/rpc
 COPY run.sh /service
 COPY run_rpc.sh /service
 WORKDIR /service
