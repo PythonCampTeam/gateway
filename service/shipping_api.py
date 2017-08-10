@@ -35,8 +35,10 @@ class ShippingAPI(object):
     @hug.object.get('/api/shipments/{ID}/currency/{CURRENCY}',
                     example='id=cart&currency=USD')
     def shipments_rates(self, **kwargs):
+        sh_id = kwargs.get('ID')
+        sh_currency = kwargs.get('CURRENCY')
         """ function return rate for the shipment"""
-        return {}
+        return {'id': sh_id, 'sh_currency': sh_currency}
 
     @hug.object.get('/api/shipments/{ID}/label', example='id=cart_id')
     def shipments_label(self, **kwargs):
