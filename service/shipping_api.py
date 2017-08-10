@@ -13,7 +13,7 @@ class ShippingAPI(object):
         category(str): string name category of products
         """
 
-    @hug.object.get('/api/products',
+    @hug.object.get('/api/shipments',
                     examples='name=NoteBook&category=Dell')
     def shipments(self, name: str):
         with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
@@ -42,4 +42,3 @@ class ShippingAPI(object):
     def shipments_label(self, **kwargs):
         """function generate shipping label"""
         return {}
-
