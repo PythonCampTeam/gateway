@@ -1,5 +1,5 @@
 import hug
-from service.gateway import Products
+from service.gateway import ShippingAPI
 
 route = hug.route.API(__name__)
-route.object('/api/products')(Products)
+route.object('/api/shipping')(ShippingAPI)

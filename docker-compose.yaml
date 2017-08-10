@@ -4,16 +4,24 @@ volumes:
   ipython_history: {}
 
 services:
+  rabbit:
+    container_name: rabbit-day7
+    image: rabbitmq:3.6.5
+    ports:
+      - "5672:5672"
+    networks:
+      - backend
   web_base:
     build: .
-
+    depends_on:
+      - rabbit
+    links:
+      - "rabbit:rabbit-day7"
     ports:
       - "8000:8000"
     networks:
       - front
       - backend
-    external_links:
-      - rabbit-day7:rabbit
     command: ./run.sh
 
     environment:
