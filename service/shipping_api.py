@@ -13,23 +13,13 @@ class ShippingAPI(object):
         category(str): string name category of products
         """
 
-
-class ProductsAPI(object):
-    """ Class for make request on service products
-    Args:
-        AMQP_CONFIG(dict): dict object from settings file for connect
-                            to rabbitmq
-        id(int): id products
-        name(str): string name of products
-        category(str): string name category of products
-        """
-
-    @hug.object.get('/api/products', examples='name=NoteBook&category=Dell')
-    def products(self, name: str):
+    @hug.object.get('/api/products',
+                    examples='name=NoteBook&category=Dell')
+    def shipments(self, name: str):
         with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
-            state = rpc.ProductsRPC.getproduct(name=name)
-            state2 = rpc.ProductsRPC.__doc__
-        return {name: state, '100': state2}
+            state = rpc.ShippingRPC.service_state(name=name)
+            state2 = rpc.ShipingRPC.__doc__
+        return {name: state, '42': state2}
 
     @hug.object.post('/api/shipments/{ID}',
                      examples='id=shipments_id&shipments=DHL')
@@ -52,3 +42,4 @@ class ProductsAPI(object):
     def shipments_label(self, **kwargs):
         """function generate shipping label"""
         return {}
+
