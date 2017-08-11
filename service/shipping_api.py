@@ -21,11 +21,16 @@ class ShippingAPI(object):
             state2 = rpc.ShipingRPC.__doc__
         return {name: state, '42': state2}
 
+    @hug.object.get('/api/ship')
+    def ship(self, **kwargs):
+
+        return kwargs
+
     @hug.object.post('/api/shipments/{ID}',
                      examples='id=shipments_id&shipments=DHL')
     def shipments_add(self, **kwargs):
         new_shipments = kwargs.get('ID')
-        return {'id': new_shipments}
+        return {'id': new_shipments, 'body': kwargs.get('body')}
 
     @hug.object.get('/api/shipments')
     def shipments_list(self):
@@ -35,8 +40,10 @@ class ShippingAPI(object):
     @hug.object.get('/api/shipments/{ID}/currency/{CURRENCY}',
                     example='id=cart&currency=USD')
     def shipments_rates(self, **kwargs):
+        sh_id = kwargs.get('ID')
+        sh_currency = kwargs.get('CURRENCY')
         """ function return rate for the shipment"""
-        return {}
+        return {'id': sh_id, 'sh_currency': sh_currency}
 
     @hug.object.get('/api/shipments/{ID}/label', example='id=cart_id')
     def shipments_label(self, **kwargs):

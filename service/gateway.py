@@ -21,6 +21,8 @@ class ShippingAPI(object):
             state2 = rpc.ShipingRPC.__doc__
         return {name: state, '42': state2}
 
+
+
     @hug.object.post('/api/shipments/{ID}',
                      examples='id=shipments_id&shipments=DHL')
     def shipments_add(self, **kwargs):
