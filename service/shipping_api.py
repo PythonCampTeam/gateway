@@ -1,6 +1,7 @@
 import hug
 from nameko.standalone.rpc import ClusterRpcProxy
 from config.settings.common import security as security_settings
+from integration import rpc_service
 
 
 class ShippingAPI(object):
@@ -24,7 +25,7 @@ class ShippingAPI(object):
     @hug.object.get('/api/ship')
     def ship(self, **kwargs):
 
-        return kwargs
+        return rpc_service.rpc_method(name=kwargs)
 
     @hug.object.post('/api/shipments/{ID}',
                      examples='id=shipments_id&shipments=DHL')
