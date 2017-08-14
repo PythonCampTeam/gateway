@@ -13,11 +13,11 @@ class ProductsAPI(object):
         category(str): string name category of products
         """
 
-    @hug.object.get('/api/products', examples='/')
-    def test(self):
+    @hug.object.get('/api/products/list/{limit}', examples='limit=100')
+    def products_list(self, limit: int):
         """Get list of available product"""
         with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
-            products = rpc.ProductsRPC.list_products()
+            products = rpc.ProductsRPC.list_products(limit)
         return products
 
     @hug.object.get('/api/products/{ID}',
@@ -28,23 +28,6 @@ class ProductsAPI(object):
         with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
             product = rpc.ProductsRPC.getproduct(ID_product)
         return product
-
-    # @hug.object.post('/api/products/create',
-    #                  examples='name=NoteBook&description=Dell')
-    # def products_created(self, **kwargs):
-    #     """Connect to stripe and obtain information about product"""
-    #     name = kwargs.get('n    ame')
-    #     description = kwargs.get('description')
-    #     attributes = kwargs.get('attributes')
-    #     package_dimensions = kwargs.get('package_dimensions')
-    #     # ID_product = kwargs.get('ID')
-    #     with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
-    #         product = rpc.ProductsRPC.getproduct(name=name,
-    #                                              description=description,
-    #                                              attributes=attributes,
-    #                                              package_dimensions=
-    #                                              package_dimensions)
-    #     return product
 
     @hug.object.post('/api/products/post/{ID}',
                      examples='ID=prod_BBZJ2ka5SKzKn7')
@@ -70,34 +53,21 @@ class ProductsAPI(object):
         description = convert.get("description")
         attributes = convert.get("attributes")
         package_dimensions = convert.get("package_dimensions")
-        # name = body["name"]
-        # description = body["description"]
-        # attributes = body["attributes"]
-        # package_dimensions = body["package_dimensions"]
         with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
             product = rpc.ProductsRPC.create_product(name, description,
                                                      attributes,
                                                      package_dimensions)
         return product
-        # return name, description, attributes, package_dimensions, kwargs
 
-# name = kwargs.get("name")
-# description = kwargs.get("description")
-# attributes = kwargs.get("attributes")
-# package_dimensions = kwargs.get("package_dimensions")
-    # @hug.object.get('/api/products/{list}',
-    #                 examples='')
-    # def list_products(self, **kwargs):
-    #     """Return list og products"""
-    #     count = kwargs.get('count')
-    #     with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
-    #         res = rpc.ProductsRPC.list_products()
-    #     return res
-
-    # @hug.object.get('/api/products', examples='name=NoteBook&category=Dell')
-    # def test(self, name: str):
-    #     """testing"""
-    #     with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
-    #         state = rpc.ProductsRPC.testing(name=name)
-    #         state2 = rpc.ProductsRPC.__doc__
-    #     return {name: state, '100': state2}
+    @hug.object.put('/api/products/update/')
+    def product_update(self, body):
+        """Update product
+        Args:
+            body (json) parametrs for create product"""
+        kwargs = dict(body)
+        ID = kwargs.get("ID")
+        KEY = kwargs.get("KEY")
+        VALUE = kwargs.get("VALUE")
+        with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
+            product = rpc.ProductsRPC.update_product(ID, KEY, VALUE)
+        return ID, KEY, VALUE, product
