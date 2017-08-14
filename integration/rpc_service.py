@@ -1,5 +1,5 @@
-from nameko.standalone.rpc import ClusterRpcProxy
 from operator import getitem
+from nameko.standalone.rpc import ClusterRpcProxy
 from config.settings.common import security as security_settings
 
 
