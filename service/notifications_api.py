@@ -14,6 +14,10 @@ class NotificationsAPI(object):
 
     @hug.object.post('/api/notifications/email/send')
     def send_email(self, body):
+        """This method send an email to customer and notify him.
+        Args:
+            body (dict):  contain fields: to_email, subject, body, from_email
+        """
         # to_email = kwargs.get("email")
         convert = dict(body)
         email = convert.get("email")
@@ -23,6 +27,10 @@ class NotificationsAPI(object):
 
     @hug.object.post('/api/notifications/sms/send')
     def send_sms(self, body):
+        """This method send SMS to a customer and notify him
+        Args:
+            body (dict): contain fields: to_phone, subject, body
+        """
         # number = kwargs.get("number")
         convert = dict(body)
         number = convert.get("number")
