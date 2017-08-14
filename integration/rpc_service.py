@@ -25,8 +25,3 @@ class ServiceRPC(object):
         service_method = kwargs.get('method_name')
         service = getitem(self.rpc_proxy, self.service_name)
         return getattr(service, service_method)
-
-rpc_service = ServiceRPC(service_name='ShippingRPC')
-# here init methods for use
-rpc_method = rpc_service.method_rpc(method_name='service_state')
-

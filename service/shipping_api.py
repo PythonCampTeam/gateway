@@ -1,7 +1,8 @@
+import json
 import hug
 from nameko.standalone.rpc import ClusterRpcProxy
 from config.settings.common import security as security_settings
-from integration import rpc_service
+from integration import shipping_rpc
 
 
 class ShippingAPI(object):
@@ -14,18 +15,10 @@ class ShippingAPI(object):
         category(str): string name category of products
         """
 
-    @hug.object.get('/api/products',
-                    examples='name=NoteBook&category=Dell')
-    def shipments(self, name: str):
-        with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
-            state = rpc.ShippingRPC.service_state(name=name)
-            state2 = rpc.ShipingRPC.__doc__
-        return {name: state, '42': state2}
-
-    @hug.object.get('/api/ship')
+    @hug.object.get('/api/shipments/state')
     def ship(self, **kwargs):
 
-        return rpc_service.rpc_method(name=kwargs)
+        return json.loads(shipping_rpc.service_state(name=kwargs))
 
     @hug.object.post('/api/shipments/{ID}',
                      examples='id=shipments_id&shipments=DHL')
