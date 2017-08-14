@@ -44,6 +44,23 @@ class ProductsAPI(object):
             product = rpc.ProductsRPC.filter_products(category)
         return product
 
+    @hug.object.get('/api/products/sorted/{order_by}',
+                    examples='order_by=name')
+    def products_sorted(self, **kwargs):
+        """Returns the sorted product list
+        Args:
+            order_by (str) parameter for to sorty
+        Returns:
+            sorted products list"""
+        DESC = False
+        order_by = kwargs.get('order_by')
+        if order_by[0] == '-':
+            DESC = True
+            order_by = order_by[1:]
+        with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
+            product = rpc.ProductsRPC.sorted_products(order_by, DESC)
+        return product, order_by
+
     @hug.object.delete('/api/products/delete/{ID}',
                        examples='ID=prod_BBs1U1qwftIUs9')
     def product_delete(self, **kwargs):
