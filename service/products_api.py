@@ -31,25 +31,31 @@ class ProductsAPI(object):
             product = rpc.ProductsRPC.getproduct(ID_product)
         return product
 
-    @hug.object.post('/api/products/post/{ID}',
-                     examples='ID=prod_BBZJ2ka5SKzKn7')
-    def testpost1(self, **kwargs):
-        """For checking work"""
-        ID_product = kwargs.get('ID')
-        return {'id': ID_product}
+    @hug.object.get('/api/products/filter/{category}',
+                    examples='category=toys')
+    def products_filter(self, **kwargs):
+        """Product Filtering
+        Args:
+            category (string) category for search products
+        Return:
+            Returns a product object if the call succeeded."""
+        category = kwargs.get('category')
+        with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
+            product = rpc.ProductsRPC.filter_products(category)
+        return product
 
     @hug.object.delete('/api/products/delete/{ID}',
                        examples='ID=prod_BBs1U1qwftIUs9')
     def product_delete(self, **kwargs):
         """Connect to stripe and delete product
         Args:
-            ID (string) ID product to delete
+            id_product (string) ID product to delete
         Returns:
             Returns an object with a deleted parameter on success.
             Otherwise, this call raises an error."""
-        ID_product = kwargs.get('ID')
+        id_product = kwargs.get('ID')
         with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
-            product = rpc.ProductsRPC.delete_product(ID_product)
+            product = rpc.ProductsRPC.delete_product(id_product)
         return product
 
     @hug.object.post('/api/products/create/')
@@ -85,15 +91,15 @@ class ProductsAPI(object):
         """Updates the product
         Note: Note that a product’s attributes are not editable.
         Args:
-            ID (string) The ID of the product to update.
-            KEY (string) The parameter to update.
-            VALUE New value for the parameter
+            id_product (string) The ID of the product to update.
+            key (string) The parameter to update.
+            value New value for the parameter
         Returns:
             Returns the product object if the update succeeded."""
         kwargs = dict(body)
-        ID = kwargs.get("ID")
-        KEY = kwargs.get("KEY")
-        VALUE = kwargs.get("VALUE")
+        id_product = kwargs.get("id_product")
+        key = kwargs.get("key")
+        value = kwargs.get("value")
         with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
-            product = rpc.ProductsRPC.update_product(ID, KEY, VALUE)
-        return ID, KEY, VALUE, product
+            product = rpc.ProductsRPC.update_product(id_product, key, value)
+        return product
