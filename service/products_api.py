@@ -1,6 +1,7 @@
 import hug
 from nameko.standalone.rpc import ClusterRpcProxy
 from config.settings.common import security as security_settings
+# from integration import products_rpc
 
 
 class ProductsAPI(object):
@@ -29,19 +30,27 @@ class ProductsAPI(object):
         ID_product = kwargs.get('ID')
         with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
             product = rpc.ProductsRPC.getproduct(ID_product)
+        # product = products_rpc.getproduct(ID_product)
         return product
 
-    @hug.object.get('/api/products/filter/{category}',
-                    examples='category=toys')
+    @hug.object.get('/api/products/filter/{category}{order_by}',
+                    examples='category=toys&order_by=name')
     def products_filter(self, **kwargs):
         """Product Filtering
         Args:
             category (string) category for search products
+            DESC (bool) sorting direction
+            order_by (string) parameter for to sorty
         Return:
-            Returns a product object if the call succeeded."""
+            Sorted products list."""
         category = kwargs.get('category')
+        DESC = False
+        order_by = kwargs.get('order_by')
+        if order_by[0] == '-':
+            DESC = True
+            order_by = order_by[1:]
         with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
-            product = rpc.ProductsRPC.filter_products(category)
+            product = rpc.ProductsRPC.filter_products(category, order_by, DESC)
         return product
 
     @hug.object.get('/api/products/sorted/{order_by}',
@@ -51,7 +60,7 @@ class ProductsAPI(object):
         Args:
             order_by (str) parameter for to sorty
         Returns:
-            sorted products list"""
+            Sorted products list"""
         DESC = False
         order_by = kwargs.get('order_by')
         if order_by[0] == '-':
@@ -61,17 +70,24 @@ class ProductsAPI(object):
             product = rpc.ProductsRPC.sorted_products(order_by, DESC)
         return product
 
-    @hug.object.get('/api/products/search/{search}',
-                    examples='search=dogs')
+    @hug.object.get('/api/products/search/{search}{order_by}',
+                    examples='search=dogs&order_by=price')
     def products_searched(self, **kwargs):
         """Returns the sorted product list
         Args:
-            order_by (str) parameter for to sorty
+            search (string) parameter for to searching
+            order_by (string) parameter for to sorty
+            DESC (bool) sorting direction
         Returns:
-            sorted products list"""
+            Sorted products list"""
         search = kwargs.get('search')
+        DESC = False
+        order_by = kwargs.get('order_by')
+        if order_by[0] == '-':
+            DESC = True
+            order_by = order_by[1:]
         with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
-            product = rpc.ProductsRPC.search_products(search)
+            product = rpc.ProductsRPC.search_products(search, order_by, DESC)
         return product
 
     @hug.object.delete('/api/products/delete/{ID}',
@@ -104,16 +120,8 @@ class ProductsAPI(object):
             Returns a product object if the call succeeded.
         """
         convert = dict(body)
-        name = convert.get("name")
-        description = convert.get("description")
-        attributes = convert.get("attributes")
-        package_dimensions = convert.get("package_dimensions")
-        metadata = convert.get("metadata")
         with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
-            product = rpc.ProductsRPC.create_product(name, description,
-                                                     attributes,
-                                                     package_dimensions,
-                                                     metadata)
+            product = rpc.ProductsRPC.create_product(convert)
         return product
 
     @hug.object.put('/api/products/update/')
