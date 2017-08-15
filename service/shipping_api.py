@@ -20,16 +20,17 @@ class ShippingAPI(object):
 
         return json.loads(shipping_rpc.service_state(name=kwargs))
 
-    @hug.object.post('/api/shipments/{ID}',
+    @hug.object.post('/api/shipments',
                      examples='id=shipments_id&shipments=DHL')
     def shipments_add(self, **kwargs):
-        new_shipments = kwargs.get('ID')
-        return {'id': new_shipments, 'body': kwargs.get('body')}
+        new_shipments = json.dumps(kwargs.get('address_to'))
+
+        return shipping_rpc.shipping_add(address_to=new_shipments)
 
     @hug.object.get('/api/shipments')
     def shipments_list(self):
         """function return lists of shipments"""
-        return {}
+        return shipping_rpc.shipping_get()
 
     @hug.object.get('/api/shipments/{ID}/currency/{CURRENCY}',
                     example='id=cart&currency=USD')
