@@ -1,15 +1,14 @@
 import hug
-from nameko.standalone.rpc import ClusterRpcProxy
-from config.settings.common import security as security_settings
+import json
+from integration import notifications_rpc
 
 
 class NotificationsAPI(object):
     @hug.object.get('/api/notifications',
                     examples='name=NoteBook&category=Dell')
     def shipments(self, name: str):
-        with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
-            state = rpc.NotificationsRPC.testing(name=name)
-            state2 = rpc.NotificationsRPC.__doc__
+        state = notifications_rpc.testing(name=name)
+        state2 = notifications_rpc.__doc__
         return {name: state, '42': state2}
 
     @hug.object.post('/api/notifications/email/send')
@@ -25,10 +24,12 @@ class NotificationsAPI(object):
         subgect = convert.get("subject")
         content = convert.get("content")
 
-        with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
-            state = rpc.NotificationsRPC.send_email(to_email, from_email,
-                                                    subgect, content)
-        return state
+        state = notifications_rpc.send_email(to_email,
+                                             from_email,
+                                             subgect,
+                                             content
+                                             )
+        return json.dumps(state)
 
     @hug.object.post('/api/notifications/Accounts/{AccountSid}/Messages',
                      example='AccountSid=AC3adbfe0e72f9d7dc7197fefd2cab7aca')
@@ -41,6 +42,5 @@ class NotificationsAPI(object):
         convert = dict(body)
         to_phone = convert.get("to_phone")
         content = convert.get("content")
-        with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
-            state = rpc.NotificationsRPC.send_sms(to_phone, content)
-        return state
+        state = notifications_rpc.send_sms(to_phone, content)
+        return json.dumps(state)
