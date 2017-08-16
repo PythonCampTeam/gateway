@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-from nameko.standalone.rpc import ClusterRpcProxy
-from operator import getitem
-=======
 from operator import getitem
 from nameko.standalone.rpc import ClusterRpcProxy
->>>>>>> feature/products_work
 from config.settings.common import security as security_settings
 
 
@@ -22,21 +17,6 @@ class ServiceRPC(object):
         ...{"id": 42}
     """
     def __init__(self, **kwargs):
-<<<<<<< HEAD
-        self.rpc_proxy = ClusterRpcProxy(security_settings.AMQP_CONFIG)
-        self.service_name = kwargs.get('service_name')
-
-    def method_rpc(self, **kwargs):
-        self.rpc_proxy = self.rpc_proxy.start()
-        service_method = kwargs.get('method_name')
-        service = getitem(self.rpc_proxy, self.service_name)
-        return getattr(service, service_method)
-
-rpc_service = ServiceRPC(service_name='ShippingRPC')
-# here init methods for use
-rpc_method = rpc_service.method_rpc(method_name='service_state')
-
-=======
         self.rpc_cluster = ClusterRpcProxy(security_settings.AMQP_CONFIG)
         self.service_name = kwargs.get('service_name')
         self.rpc_proxy = self.rpc_cluster.start()
@@ -45,4 +25,3 @@ rpc_method = rpc_service.method_rpc(method_name='service_state')
         rpc_method = kwargs.get('method_name')
         service = getitem(self.rpc_proxy, self.service_name)
         return getattr(service, rpc_method)
->>>>>>> feature/products_work
