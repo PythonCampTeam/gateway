@@ -1,7 +1,6 @@
 import hug
 from nameko.standalone.rpc import ClusterRpcProxy
 from config.settings.common import security as security_settings
-from integration import rpc_service
 
 
 class ShippingAPI(object):
@@ -14,7 +13,7 @@ class ShippingAPI(object):
         category(str): string name category of products
         """
 
-    @hug.object.get('/api/products',
+    @hug.object.get('/api/shipments',
                     examples='name=NoteBook&category=Dell')
     def shipments(self, name: str):
         with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
@@ -22,16 +21,11 @@ class ShippingAPI(object):
             state2 = rpc.ShipingRPC.__doc__
         return {name: state, '42': state2}
 
-    @hug.object.get('/api/ship')
-    def ship(self, **kwargs):
-
-        return rpc_service.rpc_method(name=kwargs)
-
     @hug.object.post('/api/shipments/{ID}',
                      examples='id=shipments_id&shipments=DHL')
     def shipments_add(self, **kwargs):
         new_shipments = kwargs.get('ID')
-        return {'id': new_shipments, 'body': kwargs.get('body')}
+        return {'id': new_shipments}
 
     @hug.object.get('/api/shipments')
     def shipments_list(self):
@@ -41,13 +35,10 @@ class ShippingAPI(object):
     @hug.object.get('/api/shipments/{ID}/currency/{CURRENCY}',
                     example='id=cart&currency=USD')
     def shipments_rates(self, **kwargs):
-        sh_id = kwargs.get('ID')
-        sh_currency = kwargs.get('CURRENCY')
         """ function return rate for the shipment"""
-        return {'id': sh_id, 'sh_currency': sh_currency}
+        return {}
 
     @hug.object.get('/api/shipments/{ID}/label', example='id=cart_id')
     def shipments_label(self, **kwargs):
         """function generate shipping label"""
         return {}
-

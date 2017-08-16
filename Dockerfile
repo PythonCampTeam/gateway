@@ -17,7 +17,3 @@ RUN apt-get update && apt-get install -y \
   netcat
 
 RUN /bin/bash -c "pip3 install -r /gateway/requirements/base.txt"
-#ENV PYTHONPATH=${PYTHONPATH}:/service/config
-
-#CMD /service/run.sh
-#CMD ["nameko","run" "/service/rpc/service_hello"]
