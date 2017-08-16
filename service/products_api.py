@@ -1,7 +1,5 @@
 import hug
-from nameko.standalone.rpc import ClusterRpcProxy
-from config.settings.common import security as security_settings
-# from integration import products_rpc
+from integration import products_rpc
 
 
 class ProductsAPI(object):
@@ -15,8 +13,7 @@ class ProductsAPI(object):
              A limit on the number of objects to be returned.
         Returns:
             Returns a list of products objects if the call succeeded"""
-        with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
-            products = rpc.ProductsRPC.list_products(limit)
+        products = products_rpc.list_products(limit)
         return products
 
     @hug.object.get('/api/products/{ID}',
@@ -27,10 +24,8 @@ class ProductsAPI(object):
             ID (string) ID product to return
         Return:
             Returns a product object if the call succeeded."""
-        ID_product = kwargs.get('ID')
-        with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
-            product = rpc.ProductsRPC.getproduct(ID_product)
-        # product = products_rpc.getproduct(ID_product)
+        id_product = kwargs.get('ID')
+        product = products_rpc.getproduct(id_product)
         return product
 
     @hug.object.get('/api/products/filter/{category}{order_by}',
@@ -49,8 +44,7 @@ class ProductsAPI(object):
         if order_by[0] == '-':
             DESC = True
             order_by = order_by[1:]
-        with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
-            product = rpc.ProductsRPC.filter_products(category, order_by, DESC)
+        product = products_rpc.filter_products(category, order_by, DESC)
         return product
 
     @hug.object.get('/api/products/sorted/{order_by}',
@@ -66,8 +60,7 @@ class ProductsAPI(object):
         if order_by[0] == '-':
             desc = True
             order_by = order_by[1:]
-        with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
-            product = rpc.ProductsRPC.sorted_products(order_by, desc)
+        product = products_rpc.sorted_products(order_by, desc)
         return product
 
     @hug.object.get('/api/products/search/{search}{order_by}',
@@ -86,8 +79,7 @@ class ProductsAPI(object):
         if order_by[0] == '-':
             desc = True
             order_by = order_by[1:]
-        with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
-            product = rpc.ProductsRPC.search_products(search, order_by, desc)
+        product = products_rpc.search_products(search, order_by, desc)
         return product
 
     @hug.object.delete('/api/products/delete/{ID}',
@@ -100,8 +92,7 @@ class ProductsAPI(object):
             Returns an object with a deleted parameter on success.
             Otherwise, this call raises an error."""
         id_product = kwargs.get('ID')
-        with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
-            product = rpc.ProductsRPC.delete_product(id_product)
+        product = products_rpc.delete_product(id_product)
         return product
 
     @hug.object.post('/api/products/create/')
@@ -120,8 +111,7 @@ class ProductsAPI(object):
             Returns a product object if the call succeeded.
         """
         convert = dict(body)
-        with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
-            product = rpc.ProductsRPC.create_product(convert)
+        product = products_rpc.create_product(convert)
         return product
 
     @hug.object.put('/api/products/update/')
@@ -138,6 +128,5 @@ class ProductsAPI(object):
         id_product = kwargs.get("id_product")
         key = kwargs.get("key")
         value = kwargs.get("value")
-        with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
-            product = rpc.ProductsRPC.update_product(id_product, key, value)
+        product = products_rpc.update_product(id_product, key, value)
         return product
