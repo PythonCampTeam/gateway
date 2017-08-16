@@ -61,13 +61,13 @@ class ProductsAPI(object):
             order_by (str) parameter for to sorty
         Returns:
             Sorted products list"""
-        DESC = False
+        desc = False
         order_by = kwargs.get('order_by')
         if order_by[0] == '-':
-            DESC = True
+            desc = True
             order_by = order_by[1:]
         with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
-            product = rpc.ProductsRPC.sorted_products(order_by, DESC)
+            product = rpc.ProductsRPC.sorted_products(order_by, desc)
         return product
 
     @hug.object.get('/api/products/search/{search}{order_by}',
@@ -81,13 +81,13 @@ class ProductsAPI(object):
         Returns:
             Sorted products list"""
         search = kwargs.get('search')
-        DESC = False
+        desc = False
         order_by = kwargs.get('order_by')
         if order_by[0] == '-':
-            DESC = True
+            desc = True
             order_by = order_by[1:]
         with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
-            product = rpc.ProductsRPC.search_products(search, order_by, DESC)
+            product = rpc.ProductsRPC.search_products(search, order_by, desc)
         return product
 
     @hug.object.delete('/api/products/delete/{ID}',
