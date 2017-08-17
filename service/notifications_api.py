@@ -8,7 +8,7 @@ class NotificationsAPI(object):
                     examples='name=NoteBook&category=Dell')
     def shipments(self, name: str):
         with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
-            state = rpc.NotificationsRPC.testing(name=name)
+            state = rpc.NotificationsRPC.docs(name=name)
             state2 = rpc.NotificationsRPC.__doc__
         return {name: state, '42': state2}
 
