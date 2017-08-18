@@ -110,8 +110,8 @@ class ProductsAPI(object):
         Returns:
             Returns a product object if the call succeeded.
         """
-        convert = dict(body)
-        product = products_rpc.create_product(convert)
+        # convert = dict(body)
+        product = products_rpc.create_product(body)
         return product
 
     @hug.object.put('/api/products/update/')
