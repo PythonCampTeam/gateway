@@ -1,5 +1,6 @@
 import json
 import hug
+from http import HTTPStatus
 from nameko.standalone.rpc import ClusterRpcProxy
 from config.settings.common import security as security_settings
 
@@ -37,20 +38,27 @@ class ShippingAPI(object):
                                          session=''
                                          )
 
-    @hug.object.get('/api/shipments{sort}')
+    @hug.object.get('/api/shipments')
     def shipments_list(self, **kwargs):
         """function return lists of shipments"""
-        sort = kwargs.get('sort')
-        print(sort)
-        return shipping_rpc.shipping_get(sort=sort)
+        sort = kwargs.get('order_by')
+        print(sort, '#'*25)
+        return json.loads(shipping_rpc.shipping_get(order_by=sort))
 
-    @hug.object.get('/api/shipments/{ID}/currency/{CURRENCY}',
+    @hug.object.get('/api/shipments/{ID}/rates/{CURRENCY}',
                     example='id=cart&currency=USD')
     def shipments_rates(self, **kwargs):
-        sh_id = kwargs.get('ID')
-        sh_currency = kwargs.get('CURRENCY')
         """ function return rate for the shipment"""
-        return {'id': sh_id, 'sh_currency': sh_currency}
+        shipments_id = kwargs.get('ID')
+        shipments_currency = kwargs.get('CURRENCY')
+        rates_result = shipping_rpc.shipping_get_rates(
+                                    object_id=shipments_id,
+                                    object_rates=shipments_currency)
+        rates_result = json.loads(rates_result)
+        print(rates_result.items(), '###'*25)
+        if all(rates_result.values()):
+            return rates_result
+        return HTTPStatus.NOT_FOUND
 
     @hug.object.get('/api/shipments/{ID}/label', example='id=cart_id')
     def shipments_label(self, **kwargs):
