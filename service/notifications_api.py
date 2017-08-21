@@ -18,18 +18,17 @@ class NotificationsAPI(object):
             body (dict):  contain fields: to_email, subject, body, from_email
         """
         # to_email = kwargs.get("email")
-        convert = dict(body)
-        to_email = convert.get("to_email")
-        from_email = convert.get("from_email")
-        subgect = convert.get("subject")
-        content = convert.get("content")
+        to_email = body.get("to_email")
+        from_email = body.get("from_email")
+        subject = body.get("subject")
+        content = body.get("content")
 
-        state = notifications_rpc.send_email(to_email,
+        state = notifications_rpc.send_email(subject,
+                                             content,
                                              from_email,
-                                             subgect,
-                                             content
+                                             to_email
                                              )
-        return json.dumps(state)
+        return state
 
     @hug.object.post('/api/notifications/Messages/')
     def send_sms(self, body):
@@ -38,8 +37,16 @@ class NotificationsAPI(object):
             body (dict): contain fields: to_phone, content
         """
         # number = kwargs.get("number")
-        convert = dict(body)
+        convert = body
         to_phone = convert.get("to_phone")
         content = convert.get("content")
         state = notifications_rpc.send_sms(to_phone, content)
         return json.dumps(state)
+
+
+body = {
+	"to_email": "tamara.malysheva@saritasa.com",
+	"from_email": "test@example.com",
+	"subject" : "blabla",
+	"content" : "content"
+}
