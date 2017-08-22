@@ -28,8 +28,8 @@ class NotificationsAPI(object):
 
 
 body = {
-	"to_email": "tamara.malysheva@saritasa.com",
-	"from_email": "test@example.com",
-	"subject" : "blabla",
-	"content" : "content"
+    "to_email": "tamara.malysheva@saritasa.com",
+    "from_email": "test@example.com",
+    "subject": "blabla",
+    "content": "content"
 }
