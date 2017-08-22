@@ -1,35 +1,32 @@
 import hug
-import json
 import falcon
 from integration import notifications_rpc
 
 
 class NotificationsAPI(object):
 
-    @hug.object.post('/api/notifications/email/send')
-    def send_email(self, data):
+    @hug.object.post('/api/notifications/email/')
+    def send_email(self, body):
         """This method send an email to customer and notify him.
         Args:
-            body (dict):  contain fields: to_email, subject, body, from_email
+            data (dict):  contain fields: to_email, subject, body, from_email
         """
-        state = notifications_rpc.send_email(data)
-        if state is False:
-            return falcon.HTTP_400
+        if body is None:
+            return {"code": falcon.HTTP_400,
+                    "error":
+                    "Required fields to_phone, content"}
+        state = notifications_rpc.send_email(body)
         return state
 
-    @hug.object.post('/api/notifications/Messages/')
+    @hug.object.post('/api/notifications/sms/')
     def send_sms(self, body):
         """This method send SMS to a customer and notify him
         Args:
             body (dict): contain fields: to_phone, content
         """
+        if body is None:
+            return {"code": falcon.HTTP_400,
+                    "error":
+                    "Required fields to_phone, content"}
         state = notifications_rpc.send_sms(body)
-        return json.dumps(state)
-
-
-body = {
-	"to_email": "tamara.malysheva@saritasa.com",
-	"from_email": "test@example.com",
-	"subject" : "blabla",
-	"content" : "content"
-}
+        return state

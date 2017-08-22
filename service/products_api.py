@@ -16,6 +16,7 @@ class ProductsAPI(object):
         products = products_rpc.list_products(limit)
         return products
 
+
     @hug.object.get('/api/products/{ID}',
                     examples='ID=prod_BBZJ2ka5SKzKn7')
     def products_id(self, **kwargs):
@@ -130,3 +131,8 @@ class ProductsAPI(object):
         value = kwargs.get("value")
         product = products_rpc.update_product(id_product, key, value)
         return product
+
+
+@hug.exception(Exception)
+def hendl(ex):
+    print(ex)
