@@ -9,12 +9,14 @@ class ProductsAPI(object):
     @hug.object.get('/api/products/',
                     examples='id_product=prod_BBZJ2ka5SKzKn7')
     def products_id(self, id_product=None):
-        """
-        Connect to stripe and obtain information about product
+        """Connect to stripe and obtain information about product
+
         Args:
             id_product (string) id by product
+
         Return:
             Returns a product object if the call succeeded.
+
         """
         if id_product is None:
             return None
@@ -24,12 +26,13 @@ class ProductsAPI(object):
     @hug.object.get('/api/products/filter/',
                     examples='category=toys&order_by=name')
     def products_filter(self, category=False, order_by="name"):
-        """
-            Product Filtering
+        """Product Filtering
+
         Args:
             category (string) category for search products
-            DESC (bool) sorting direction
+            decs (bool) sorting direction
             order_by (string) parameter for to sorty
+
         Return:
             Sorted products list.
 
@@ -44,8 +47,7 @@ class ProductsAPI(object):
     @hug.object.delete('/api/products/delete/',
                        examples='id_product=prod_BBs1U1qwftIUs9')
     def product_delete(self, id_product=None):
-        """
-            Connect to stripe and delete product
+        """Connect to stripe and delete product
 
         Args:
             id_product (string) ID product to delete
@@ -53,7 +55,6 @@ class ProductsAPI(object):
         Returns:
             Returns an object with a deleted parameter on success.
             Otherwise, this call raises an error.
-
         """
         if id_product is None:
             return None
@@ -77,6 +78,7 @@ class ProductsAPI(object):
 
         Returns:
             Returns a product object if the call succeeded.
+
         """
         product = products_rpc.create_product(body)
         if product is False:
@@ -85,11 +87,14 @@ class ProductsAPI(object):
 
     @hug.object.put('/api/products/update/')
     def product_update(self, body):
-        """
-        Updates the product
-        Note: Note that a product’s attributes are not editable.
+        """Updates the product
+
+        Args:
+            body: (dict) The parameter to update.
+
         Returns:
             Returns the product object if the update succeeded.
+
         """
         product = products_rpc.update_product(body)
         return product
