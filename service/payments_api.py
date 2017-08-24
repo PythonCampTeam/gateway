@@ -118,7 +118,10 @@ class PaymentAPI(object):
             order (dict): booking of customer
         """
         order = payment_rpc.pay_order(body)
-        data_mail = {"to_email": self.mail_customer}
+        data_mail = {"to_email": self.mail_customer,
+                     "name": self.customer_name,
+                     "label": label,
+                     }
         data_sms = {"to_phone": self.phone_customer}
         res1 = notifications_rpc.send_email(data_mail)
         res2 = notifications_rpc.send_sms(data_sms)
