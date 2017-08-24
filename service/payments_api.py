@@ -2,7 +2,7 @@ import hug
 from integration import payment_rpc
 import falcon
 from integration import notifications_rpc
-# from integration import shipping_rpc
+from integration import shipping_rpc
 # import json
 
 
