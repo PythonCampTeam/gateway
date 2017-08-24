@@ -7,12 +7,6 @@ from config.settings.common import security as security_settings
 from integration import shipping_rpc
 
 
-@hug.directive()
-def session(self, context_name='session', request=None, **kwargs):
-    """Returns the session associated with the current request"""
-    return request and request.headers or None
-
-
 class ShippingAPI(object):
     """ Class for make request on service products
     Args:
@@ -22,21 +16,23 @@ class ShippingAPI(object):
         name(str): string name of products
         category(str): string name category of products
         """
+
     @hug.object.get('/api/shipments/state')
     def ship(self, **kwargs):
 
         return json.loads(shipping_rpc.service_state(name=kwargs))
 
-    @hug.object.post('/api/shipments',
-                     examples='id=shipments_id&shipments=DHL')
-    def shipments_add(self, body=None, **kwargs):
-        new_shipments = json.dumps(kwargs.get('address_to'))
-        print(body, 'sesssion')
-        print(new_shipments)
+    @hug.object.post('/api/shipments')
+    def shipments_callback(self, **kwargs):
+        """ method work with stripe service when create order
+        and answer rates of shipment
+        Kwargs(dict): data item of order
+        Return:
+            dict: with order data updated rates and create shipments
+        """
 
-        return shipping_rpc.shipping_add(address_to=new_shipments,
-                                         session=''
-                                         )
+        order_update = shipping_rpc.shipping_order_update(**kwargs)
+        return order_update
 
     @hug.object.get('/api/shipments')
     def shipments_list(self, **kwargs):
@@ -47,18 +43,27 @@ class ShippingAPI(object):
 
     @hug.object.get('/api/shipments/{ID}/rates/{CURRENCY}',
                     example='id=cart&currency=USD')
-    def shipments_rates(self, **kwargs):
+    def shipments_rates(self, session: hug.directives.session, **kwargs):
         """ function return rate for the shipment"""
         shipments_id = kwargs.get('ID')
         shipments_currency = kwargs.get('CURRENCY')
+
         rates_result = shipping_rpc.shipping_get_rates(
                                     object_id=shipments_id,
                                     object_rates=shipments_currency)
-        rates_result = json.loads(rates_result)
-        print(rates_result.items(), '###'*25)
-        if all(rates_result.values()):
-            return rates_result
-        return HTTPStatus.NOT_FOUND
+
+        if rates_result:
+            rates_result = json.loads(rates_result)
+            print(rates_result.items(), '###'*25)
+            if all(rates_result.values()):
+                return rates_result
+        raise Exception(session)
+        #return rates_result
+
+    @hug.object.post('/api/order')
+    def stripe_callback(self, **kwargs):
+
+        return {}
 
     @hug.object.get('/api/shipments/{ID}/label', example='id=cart_id')
     def shipments_label(self, **kwargs):
