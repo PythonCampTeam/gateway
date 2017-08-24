@@ -1,6 +1,7 @@
 import hug
 import falcon
 from integration import notifications_rpc
+import nameko
 
 
 class NotificationsAPI(object):
@@ -30,3 +31,8 @@ class NotificationsAPI(object):
                     "Required fields to_phone, content"}
         state = notifications_rpc.send_sms(body)
         return state
+
+    @hug.exception(nameko.exceptions.RemoteError)
+    def handle_exception(exception):
+        """Handles the provided exception for testing"""
+        return {"messages": "O_o"}
