@@ -31,7 +31,7 @@ services:
       - RABBIT_PORT=5672
       - RABBIT_MANAGEMENT_PORT=15672
       - SETTINGS_MODULE=gateway
-      - PYTHONPATH=${PYTHONPATH}:/gateway
+      - PYTHONPATH=:/gateway
 
 networks:
   backend:

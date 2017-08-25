@@ -6,17 +6,15 @@ from integration import products_rpc
 class ProductsAPI(object):
     """Class for created objects Products and worked with them """
 
-    @hug.object.get('/api/products/',
+    @hug.object.get('/api/products/ID',
                     examples='id_product=prod_BBZJ2ka5SKzKn7')
-    def products_id(self, id_product=None):
+    def products_id(self, id_product):
         """Connect to stripe and obtain information about product
         Args:
             id_product (string) id by product
         Return:
             Returns a product object if the call succeeded.
         """
-        if id_product is None:
-            return None
         product = products_rpc.get_product(id_product)
         return product
 
@@ -38,7 +36,7 @@ class ProductsAPI(object):
         product = products_rpc.search_products(category, order_by, decs)
         return product
 
-    @hug.object.delete('/api/products/delete/',
+    @hug.object.delete('/api/products/ID',
                        examples='id_product=prod_BBs1U1qwftIUs9')
     def product_delete(self, id_product=None):
         """Connect to stripe and delete product
@@ -53,7 +51,7 @@ class ProductsAPI(object):
         product = products_rpc.delete_product(id_product)
         return product
 
-    @hug.object.post('/api/products/create/')
+    @hug.object.post('/api/products/')
     def products_created(self, body):
         """
             Create new product
@@ -74,13 +72,18 @@ class ProductsAPI(object):
             return falcon.HTTP_400
         return product
 
-    @hug.object.put('/api/products/update/')
-    def product_update(self, body):
+    @hug.object.put('/api/products/ID')
+    def product_update(self, id_product, body):
         """Updates the product
         Args:
             body: (dict) The parameter to update.
         Returns:
             Returns the product object if the update succeeded.
         """
-        product = products_rpc.update_product(body)
+        if body is None:
+            return {
+                    "code": falcon.HTTP_400,
+                    "message": "Fill in the attributes"
+                    }
+        product = products_rpc.update_product(id_product, body)
         return product
