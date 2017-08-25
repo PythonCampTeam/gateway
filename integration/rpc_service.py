@@ -16,7 +16,7 @@ class ServiceRPC(object):
             needed_method(id=42)
         ...{"id": 42}
     """
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         self.rpc_cluster = ClusterRpcProxy(security_settings.AMQP_CONFIG)
         self.service_name = kwargs.get('service_name')
         self.rpc_proxy = self.rpc_cluster.start()
