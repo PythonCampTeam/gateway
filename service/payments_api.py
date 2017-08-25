@@ -3,6 +3,7 @@ from integration import payment_rpc
 import falcon
 from integration import notifications_rpc
 from integration import shipping_rpc
+# from integration import products_rpc
 # import json
 
 
@@ -19,16 +20,16 @@ class PaymentAPI(object):
     order_customer = None
 
     @hug.object.post('/api/cart/add/')
-    def add_in_cart(self, body):
+    def add_in_cart(self, product_id, quality):
         """Method put product in cart, with quantity
         Args:
             body(dict) body request
         Returns:
             Object of cart if success called
         """
-        if body is None:
-            return falcon.HTTP_400
-        product = payment_rpc.add_in_cart(body)
+        # sku = products_rpc.get_sku_product(product_id)
+        # product = payment_rpc.add_in_cart(sku, quality)
+        product = payment_rpc.add_in_cart(product_id, quality)
         return product
 
     @hug.object.get('/api/cart/')
@@ -41,7 +42,7 @@ class PaymentAPI(object):
         return payment_rpc.get_cart()
 
     @hug.object.put('/api/cart/update/')
-    def update_cart(self, body):
+    def update_cart(self, product_id, quality):
         """Update quantity of given product in the cart
 
         Args:
@@ -51,7 +52,7 @@ class PaymentAPI(object):
             Updated cart if successful, error message otherwise.
 
         """
-        product = payment_rpc.update_cart(body)
+        product = payment_rpc.update_cart(product_id, quality)
         return product
 
     @hug.object.delete('/api/cart/delete/',
@@ -92,10 +93,12 @@ class PaymentAPI(object):
         self.mail_customer = response.get("email")
         self.phone_customer = response.get("phone")
         self.order_customer = response.get("response")
-        return self.order_customer, self.mail_customer, self.phone_customer
+        self.upstream_id = response.get("upstream_id")
+        return self.order_customer, self.mail_customer, self.phone_customer,
+        self.upstream_id
 
     @hug.object.put('/api/cart/shipping/')
-    def selected_shipping_method(self, body):
+    def selected_shipping_method(self, order_id, shipping_id):
         """Change shipping method in Order.
 
         Args:
@@ -104,10 +107,10 @@ class PaymentAPI(object):
         Return:
             order (dict): booking of customer
         """
-        order = payment_rpc.select_shipping(body)
+        order = payment_rpc.select_shipping(order_id, shipping_id)
         return order
 
-    @hug.object.put('/api/cart/paid/')
+    @hug.object.post('/api/cart/paid/')
     def order_payd(self, body):
         """Change shipping method in Order.
 
@@ -118,6 +121,9 @@ class PaymentAPI(object):
             order (dict): booking of customer
         """
         order = payment_rpc.pay_order(body)
+        up_id = body.get("upstream_id", self.upstream_id)
+        ship = {"upstream_id": up_id}
+        label = shipping_rpc.shipment_transaction(order)
         data_mail = {"to_email": self.mail_customer,
                      "name": self.customer_name,
                      "label": label,
@@ -125,4 +131,4 @@ class PaymentAPI(object):
         data_sms = {"to_phone": self.phone_customer}
         res1 = notifications_rpc.send_email(data_mail)
         res2 = notifications_rpc.send_sms(data_sms)
-        return order, res1, res2
+        return order, res1, res2, label

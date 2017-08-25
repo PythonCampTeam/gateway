@@ -12,3 +12,4 @@ shipping_get = rpc_service.method_rpc(method_name='shipments')
 shipping_get_rates = rpc_service.method_rpc(method_name='shipments_rates')
 
 shipping_order_update = rpc_service.method_rpc(method_name='shipments_create')
+shipment_transaction = rpc_service.method_rpc(method_name='shipment_transaction')
