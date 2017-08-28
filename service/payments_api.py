@@ -17,7 +17,7 @@ class PaymentAPI(object):
 
     mail_customer = ''
     phone_customer = ''
-    order_customer = None
+    order = None
 
     @hug.object.post('/api/cart/add/')
     def add_in_cart(self, product_id, quality):
@@ -87,14 +87,15 @@ class PaymentAPI(object):
              Object of order if successful, error message otherwise.
 
         """
-        if body is None:
+        if body is None or body == {}:
             return falcon.HTTP_400
         response = payment_rpc.new_order(body)
+        if response.get("errors"):
+            return response.get("errors")
         self.mail_customer = response.get("email")
         self.phone_customer = response.get("phone")
-        self.order_customer = response.get("response")
-        self.upstream_id = response.get("upstream_id")
-        return self.order_customer, self.mail_customer, self.phone_customer,
+        self.order = response.get("response")
+        return self.order, self.mail_customer, self.phone_customer,
         self.upstream_id
 
     @hug.object.put('/api/cart/shipping/')
@@ -121,9 +122,11 @@ class PaymentAPI(object):
             order (dict): booking of customer
         """
         order = payment_rpc.pay_order(body)
-        up_id = body.get("upstream_id", self.upstream_id)
-        ship = {"upstream_id": up_id}
-        label = shipping_rpc.shipment_transaction(order)
+        if order.get("errors"):
+            return order.get("errors")
+        label = shipping_rpc.shipment_transaction(order.get("status"),
+                                                  order.get("upstream_id"),
+                                                  order.get("selected_shipping_method"))
         data_mail = {"to_email": self.mail_customer,
                      "name": self.customer_name,
                      "label": label,
