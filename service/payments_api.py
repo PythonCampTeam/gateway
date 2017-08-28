@@ -90,6 +90,8 @@ class PaymentAPI(object):
         if body is None:
             return falcon.HTTP_400
         response = payment_rpc.new_order(body)
+        if response.get("error"):
+            return response.get("error")
         self.mail_customer = response.get("email")
         self.phone_customer = response.get("phone")
         self.order_customer = response.get("response")
