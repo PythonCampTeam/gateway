@@ -23,23 +23,22 @@ class ShippingAPI(object):
         return json.loads(shipping_rpc.service_state(name=kwargs))
 
     @hug.object.post('/api/shipments')
-    def shipments_callback(self, **kwargs):
+    def shipments_callback(self, order=None):
         """ method work with stripe service when create order
         and answer rates of shipment
         Kwargs(dict): data item of order
         Return:
             dict: with order data updated rates and create shipments
         """
-
-        order_update = shipping_rpc.shipping_order_update(**kwargs)
+        order_update = shipping_rpc.shipping_order_update(order)
         return order_update
 
     @hug.object.get('/api/shipments')
-    def shipments_list(self, **kwargs):
+    def shipments_list(self, order_by=None, hug_session=None):
         """function return lists of shipments"""
-        sort = kwargs.get('order_by')
-        print(sort, '#'*25)
-        return json.loads(shipping_rpc.shipping_get(order_by=sort))
+        if order_by:
+            return json.loads(shipping_rpc.shipping_get(order_by=order_by))
+        return json.loads(shipping_rpc.shipping_get(order_by=None))
 
     @hug.object.get('/api/shipments/{ID}/rates/{CURRENCY}',
                     example='id=cart&currency=USD')
@@ -54,19 +53,15 @@ class ShippingAPI(object):
 
         if rates_result:
             rates_result = json.loads(rates_result)
-            print(rates_result.items(), '###'*25)
             if all(rates_result.values()):
                 return rates_result
         raise Exception(session)
-        #return rates_result
 
-    @hug.object.post('/api/order')
-    def stripe_callback(self, **kwargs):
-
-        return {}
-
-    @hug.object.get('/api/shipments/{ID}/label', example='id=cart_id')
-    def shipments_label(self, **kwargs):
+    @hug.object.get('/api/shipment/{object_id}/label')
+    def shipments_label(self, object_id=None):
         """function generate shipping label"""
-        return {}
+        if object_id:
+            label = shipping_rpc.shipping_get_label(object_id=object_id)
+            return json.loads(label)
+        return None
 
