@@ -1,10 +1,12 @@
-from integration import rpc_service as rpc
-
+try:
+    from integration import rpc_service as rpc
+except ImportError:
+    from gateway.integration import rpc_service as rpc
 """
    Initialize RPC service here for integrated in hug api
 """
 
-rpc_service = rpc.ServiceRPC(service_name='ProductsRPC')
+rpc_service = rpc.ServiceRPC(service_name='Productsrpc')
 # here init methods for use
 
 get_product = rpc_service.method_rpc(method_name='get_product')

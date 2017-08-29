@@ -1,9 +1,10 @@
 import json
-import hug
 from http import HTTPStatus
-from nameko.standalone.rpc import ClusterRpcProxy
-from config.settings.common import security as security_settings
 
+import hug
+from nameko.standalone.rpc import ClusterRpcProxy
+
+from config.settings.common import security as security_settings
 from integration import shipping_rpc
 
 
