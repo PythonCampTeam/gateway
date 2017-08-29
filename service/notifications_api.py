@@ -24,10 +24,10 @@ class NotificationsAPI(object):
             state (dict): return starus code of response
 
         """
-        if to_email is None or label is None:
-            return {"code": falcon.HTTP_400,
-                    "error":
-                    "Required fields to_email, label"}
+        # if to_email is None or label is None:
+        #     return {"code": falcon.HTTP_400,
+        #             "error":
+        #             "Required fields to_email, label"}
         state = notifications_rpc.send_email(to_email, label,
                                              from_email, subject, name)
         return state
@@ -39,10 +39,10 @@ class NotificationsAPI(object):
         Args:
             body (dict): contain fields: to_phone, content
         """
-        if number is None:
-            return {"code": falcon.HTTP_400,
-                    "error":
-                    "Required fields number"}
+        # if number is None:
+        #     return {"code": falcon.HTTP_400,
+        #             "error":
+        #             "Required fields number"}
         state = notifications_rpc.send_sms(number, content)
         return state
 

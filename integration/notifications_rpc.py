@@ -1,5 +1,4 @@
 from integration import rpc_service as rpc
-
 """
    Initialize RPC service here for integrated in hug api
 """

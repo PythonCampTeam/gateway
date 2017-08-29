@@ -21,7 +21,9 @@ class ServiceRPC(object):
         self.service_name = kwargs.get('service_name')
         self.rpc_proxy = self.rpc_cluster.start()
 
-    def method_rpc(self, **kwargs):
-        rpc_method = kwargs.get('method_name')
-        service = getitem(self.rpc_proxy, self.service_name)
-        return getattr(service, rpc_method)
+    def method_rpc(self, method_name=None):
+        if method_name:
+            service = getitem(self.rpc_proxy, self.service_name)
+            return getattr(service, method_name)
+        else:
+            raise AttributeError('The attribute method_name will not empty')
