@@ -2,7 +2,7 @@ import falcon
 import hug
 import nameko
 
-from integration import notifications_rpc
+from gateway.integration import notifications_rpc
 
 
 class NotificationsAPI(object):

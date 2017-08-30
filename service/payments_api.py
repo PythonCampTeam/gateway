@@ -1,7 +1,7 @@
 import falcon
 import hug
 
-from integration import notifications_rpc, payment_rpc, shipping_rpc
+from gateway.integration import notifications_rpc, payment_rpc, shipping_rpc
 
 # from integration import products_rpc
 # import json
@@ -82,8 +82,24 @@ class PaymentAPI(object):
         """Create a order
 
         Args:
-            body(dist) parameter for order
+            body(dist) parameter for order. Contain
+            email, phone, name and adress of customer.
             response (dist) result creating order
+
+        Example:
+            body = {
+                "email": "varvara.malysheva@saritasa.com",
+                "phone": "+79994413746",
+                "name": "Chloe Taylor",
+
+                "address":{
+                    "line1":"1092 Indian Summer Ct",
+                    "city":"San Jose",
+                    "state":"CA",
+                    "country": "US",
+                    "postal_code":"95122"
+                        }
+                }
 
         Returns:
              Object of order if successful, error message otherwise.
@@ -107,6 +123,7 @@ class PaymentAPI(object):
         Args:
             body (dict): parameters for update order
 
+
         Return:
             order (dict): booking of customer
         """
@@ -114,16 +131,24 @@ class PaymentAPI(object):
         return order
 
     @hug.object.post('/api/cart/paid/')
-    def order_payd(self, body):
+    def order_payd(self, order_id, cart):
         """Change shipping method in Order.
 
         Args:
-            body (dict): parameters for update order
+            body (dict): parameters for update order.
+            Body contain id of order and cart
+
+        Example:
+            {
+            "order":"or_1AuHBMBqraFdOKT2PQySCVY5",
+            "cart": "tok_mastercard"
+            }
 
         Return:
             order (dict): booking of customer
+
         """
-        order = payment_rpc.pay_order(body)
+        order = payment_rpc.pay_order(order_id, cart)
         if order.get("errors"):
             return order.get("errors")
         label = shipping_rpc.shipment_transaction(order.get("status"),

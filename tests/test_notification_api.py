@@ -36,6 +36,7 @@ class TestNotiification(unittest.TestCase):
 if __name__ == '__main__':
     unittest.main()
 
-#hug -f service/server.py
+
 #docker-compose up --build rabbit
+#hug -f service/server.py
 #nameko run --config config/config.yml rpc.endpoints

@@ -1,10 +1,7 @@
 import falcon
 import hug
 
-try:
-    from integration import products_rpc
-except ImportError:
-    from gateway.integration import products_rpc
+from gateway.integration import products_rpc
 
 
 class ProductsAPI(object):
