@@ -4,8 +4,8 @@ from http import HTTPStatus
 import hug
 from nameko.standalone.rpc import ClusterRpcProxy
 
-from config.settings.common import security as security_settings
-from integration import shipping_rpc
+from gateway.config.settings.common import security as security_settings
+from gateway.integration import shipping_rpc
 
 
 class ShippingAPI(object):

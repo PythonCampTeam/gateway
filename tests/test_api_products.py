@@ -1,92 +1,135 @@
 import hug
 import unittest
-from service import server as api
-from service.products_api import ProductsAPI
-from integration import products_rpc
-import stripe
-# try:
-#     from gateway.service import server as api
-#     from gateway.service.products_api import ProductsAPI
-#     from gateway.integration import products_rpc
-# except ImportError:
-#     from service.products_api import ProductsAPI
-#     from integration import products_rpc
-#     from service import server as api
+from gateway.service import server as api
+from gateway.integration import products_rpc
+# import stripe
 
-from unittest.mock import MagicMock, patch
-# import unittest
+from unittest.mock import MagicMock
 
 
 class ProductsAPITest(unittest.TestCase):
 
     def setUp(self):
         self.hug_api = api
-        # self.hug_api = api
+        self.rpc = products_rpc
 
-    def test_mock_create(self):
-        """Test for checking sort product"""
-        # obj = ProductsAPI()
+    def test_create_product(self):
+        """Test for checking api method of created product"""
         body = {
                 "name": "Test"
             }
-        products_rpc.create_product = MagicMock(return_value='200')
-        print(products_rpc.create_product(body))
-        ss = hug.test.post(self.hug_api, '/api/products/', body=body)
-        print("create_product sort check")
-        print(ss.data, ss.status)
-        print("Mock create_product check")
+        self.rpc.create_product = MagicMock(return_value='201')
+        response_correct = hug.test.post(
+                                      self.hug_api,
+                                      '/api/products/',
+                                      body=body
+                                      )
+        self.assertEqual(response_correct.data, '201')
+        self.assertEqual(response_correct.status, '200 OK')
+        self.assertTrue(self.rpc.create_product.called)
 
-    def test_mock_search_products(self):
-        """Test for checking sort product"""
-        products_rpc.search_products = MagicMock(return_value='202')
-        print(products_rpc.search_products(False, 'name', True))
-        ss = hug.test.get(self.hug_api, '/api/products/', category=False,
-                          order_by='name', decs=True)
-        print("search_products sort check")
-        print(ss.data, ss.status)
-        print("Mock sorting check")
+        response_handle = hug.test.post(
+                                        self.hug_api,
+                                        '/api/products/',
+                                        params={}
+                                        )
 
-    def test_get_product(self):
-        """Test check methods ProductsAPI.products_id"""
-        response1 = hug.test.get(self.hug_api, '/api/products/ID', params={'id_product': 'prod_BBZJ2ka5SKzKn7'})
-        print('test_get_product')
-        print(response1.status)
-        response2 = hug.test.get(self.hug_api, '/api/products/ID', params={})
-        print(response2.status)
-        response3 = hug.test.get(self.hug_api, '/api/products/ID')
-        print(response3.status)
-
-    def test_create_product(self):
-        ss = hug.test.post(self.hug_api, '/api/products/', params={})
-        print('test_create_product')
-        print(ss.status)
+        self.assertEqual(response_handle.status, '200 OK')
+        self.assertEqual(response_handle.data.get('code'), '400 Bad Request')
+        # print("create_product check")
+        # print(response_true.data, response_true.status)
+        print("Test create product check")
 
     def test_delete_product(self):
-        ss = hug.test.delete(self.hug_api, '/api/products/',
-                             params={'id_product': 'prod_BBZJ2ka5SKzKn7'})
-        print('test_delete_product')
-        print(ss.status)
-        print(ss)
+        """Test for checking true delete product"""
+        self.rpc.delete_product = MagicMock(return_value='200')
+        response_correct = hug.test.delete(
+                                           self.hug_api,
+                                           '/api/products/ID',
+                                           id_product='prod_BIMKqJuS6bHLnX'
+                                           )
+        self.assertEqual(response_correct.status, '200 OK')
+        self.assertEqual(response_correct.data, '200')
+        self.assertTrue(self.rpc.delete_product.called)
+
+        response_not_value = hug.test.delete(self.hug_api, '/api/products/ID',
+                                             params={})
+        self.assertEqual(response_not_value.status, '400 Bad Request')
+        self.assertIsNotNone(response_not_value.data.get('errors'))
+        print("Test delete product check")
+        # print("delete_product check")
+        # print(ss.data, ss.status)
+        # print("Mock delete_product check")
+
+    def test_search_products(self):
+        """Test for checking sort product"""
+        self.rpc.search_products = MagicMock(return_value='200')
+
+        response_with_value = hug.test.get(self.hug_api, '/api/products/',
+                                           category=False,
+                                           order_by='-name')
+        self.assertEqual(response_with_value.status, '200 OK')
+        self.assertEqual(response_with_value.data, '200')
+
+        response_not_value = hug.test.get(self.hug_api, '/api/products/')
+        self.assertEqual(response_not_value.status, '200 OK')
+        self.assertEqual(response_not_value.data, '200')
+        self.assertTrue(self.rpc.search_products.called)
+        # print("search_products sort check")
+        # print(response_not_value.data, response_not_value.status)
+        # print("Mock sorting check")
+
+    def test_get_product(self):
+        """Test check methods api methods get product"""
+        self.rpc.get_product = MagicMock(return_value='200')
+        response_correct = hug.test.get(
+                                        self.hug_api,
+                                        '/api/products/ID',
+                                        params={'id_product':
+                                                'prod_BBZJ2ka5SKzKn7'}
+                                        )
+        self.assertEqual(response_correct.status, '200 OK')
+        self.assertEqual(response_correct.data, '200')
+        self.assertTrue(self.rpc.get_product.called)
+
+        # print('test_get_product')
+        response_not_value = hug.test.get(self.hug_api, '/api/products/ID')
+        self.assertEqual(response_not_value.status, '400 Bad Request')
+        self.assertIsNotNone(response_not_value.data.get('errors'))
 
     def test_update_product(self):
+        """Test check methods api methods update product"""
         body = {"name": "TestAPI"}
-        ss = hug.test.put(self.hug_api, '/api/products/ID',
-                          params={})
-        s2 = hug.test.put(self.hug_api, '/api/products/ID',
-                          params={'id_product': 'prod_BIMKXrqRkIdC4k'})
-        s3 = hug.test.put(self.hug_api, '/api/products/ID',
-                          id_product='prod_BIMKXrqRkIdC4k', body=body)
-        print('test_update_product')
-        print(dir(ss))
-        print(ss.status)
-        print(s2.status)
-        print(s3.status)
-        print('/n')
-        # print(s2.status)
-        # print(s2.headers)
-        # print(s2.headers_dict)
+
+        self.rpc.update_product = MagicMock(return_value='200')
+        response_correct = hug.test.put(
+                                        self.hug_api, '/api/products/ID',
+                                        id_product='prod_BIMKXrqRkIdC4k',
+                                        body=body
+                                        )
+        self.assertEqual(response_correct.status, '200 OK')
+        self.assertEqual(response_correct.data, '200')
+        self.assertTrue(self.rpc.update_product.called)
+
+        response_not_value = hug.test.put(self.hug_api, '/api/products/ID')
+
+        self.assertEqual(response_not_value.status, '400 Bad Request')
+        self.assertIsNotNone(response_not_value.data.get('errors'))
+
+        response_not_body = hug.test.put(
+                                         self.hug_api,
+                                         '/api/products/ID',
+                                         params={'id_product':
+                                                 'prod_BIMKXrqRkIdC4k'}
+                                        )
+        self.assertEqual(response_not_body.status, '200 OK')
+        self.assertEqual(response_not_body.data.get('code'), '400 Bad Request')
+
+        # print('test_update_product')
+        # print(ss.status, ss.data)
+        # print(s2.status, s2.data)
+        # print(s3.status)
 
 
 if __name__ == '__main__':
     unittest.main()
-# hug.test.get(happy_birthday, 'happy_birthday', {'name': 'Timothy', 'age': 25}) # Returns a Response object

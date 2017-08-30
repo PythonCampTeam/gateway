@@ -1,7 +1,7 @@
 import falcon
 import hug
 
-from integration import notifications_rpc, payment_rpc, shipping_rpc
+from gateway.integration import notifications_rpc, payment_rpc, shipping_rpc
 
 # from integration import products_rpc
 # import json
