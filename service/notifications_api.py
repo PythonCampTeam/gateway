@@ -1,7 +1,8 @@
-import hug
 import falcon
-from integration import notifications_rpc
+import hug
 import nameko
+
+from integration import notifications_rpc
 
 
 class NotificationsAPI(object):

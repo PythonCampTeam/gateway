@@ -1,8 +1,8 @@
-import hug
-from integration import payment_rpc
 import falcon
-from integration import notifications_rpc
-from integration import shipping_rpc
+import hug
+
+from integration import notifications_rpc, payment_rpc, shipping_rpc
+
 # from integration import products_rpc
 # import json
 
@@ -92,8 +92,8 @@ class PaymentAPI(object):
         if body is None or body == {}:
             return falcon.HTTP_400
         response = payment_rpc.new_order(body)
-        if response.get("errors"):
-            return response.get("errors")
+        if response.get("error"):
+            return response.get("error")
         self.mail_customer = response.get("email")
         self.phone_customer = response.get("phone")
         self.order = response.get("response")
