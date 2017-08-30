@@ -20,7 +20,8 @@ class PaymentAPI(object):
     order = None
 
     @hug.object.post('/api/cart/add/')
-    def add_in_cart(self, product_id, quality):
+    def add_in_cart(self, product_id: hug.types.text,
+                    quality: int):
         """Method put product in cart, with quantity
         Args:
             body(dict) body request
@@ -42,7 +43,8 @@ class PaymentAPI(object):
         return payment_rpc.get_cart()
 
     @hug.object.put('/api/cart/update/')
-    def update_cart(self, product_id, quality):
+    def update_cart(self, product_id: hug.types.text,
+                    quality: int):
         """Update quantity of given product in the cart
 
         Args:
@@ -57,7 +59,7 @@ class PaymentAPI(object):
 
     @hug.object.delete('/api/cart/delete/',
                        examples='product_id=prod_BBs1U1qwftIUs9')
-    def delete_item(self, product_id):
+    def delete_item(self, product_id: hug.types.text):
         """Delete product from the cart
 
         Args:
