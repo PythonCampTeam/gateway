@@ -97,8 +97,7 @@ class PaymentAPI(object):
         self.mail_customer = response.get("email")
         self.phone_customer = response.get("phone")
         self.order = response.get("response")
-        return self.order, self.mail_customer, self.phone_customer,
-        self.upstream_id
+        return self.order, self.mail_customer, self.phone_customer
 
     @hug.object.put('/api/cart/shipping/')
     def selected_shipping_method(self, order_id, shipping_id):
@@ -126,9 +125,11 @@ class PaymentAPI(object):
         order = payment_rpc.pay_order(body)
         if order.get("errors"):
             return order.get("errors")
-        label = shipping_rpc.shipment_transaction(order.get("status"),
-                                                  order.get("upstream_id"),
-                                                  order.get("selected_shipping_method"))
+        shipping_method = order.upstream_id
+        label = shipping_rpc.shipment_transaction(
+                                                 shipment_id=shipping_method,
+                                                 order=order
+                                                 )
         data_mail = {"to_email": self.mail_customer,
                      "name": self.customer_name,
                      "label": label,

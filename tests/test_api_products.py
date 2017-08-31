@@ -20,10 +20,10 @@ class ProductsAPITest(unittest.TestCase):
             }
         self.rpc.create_product = MagicMock(return_value='201')
         response_correct = hug.test.post(
-                                      self.hug_api,
-                                      '/api/products/',
-                                      body=body
-                                      )
+                                         self.hug_api,
+                                         '/api/products/',
+                                         body=body
+                                         )
         self.assertEqual(response_correct.data, '201')
         self.assertEqual(response_correct.status, '200 OK')
         self.assertTrue(self.rpc.create_product.called)
