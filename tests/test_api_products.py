@@ -20,10 +20,10 @@ class ProductsAPITest(unittest.TestCase):
             }
         self.rpc.create_product = MagicMock(return_value='201')
         response_correct = hug.test.post(
-                                      self.hug_api,
-                                      '/api/products/',
-                                      body=body
-                                      )
+                                         self.hug_api,
+                                         '/api/products/',
+                                         body=body
+                                         )
         self.assertEqual(response_correct.data, '201')
         self.assertEqual(response_correct.status, '200 OK')
         self.assertTrue(self.rpc.create_product.called)
@@ -91,8 +91,6 @@ class ProductsAPITest(unittest.TestCase):
         self.assertEqual(response_correct.status, '200 OK')
         self.assertEqual(response_correct.data, '200')
         self.assertTrue(self.rpc.get_product.called)
-
-        # print('test_get_product')
         response_not_value = hug.test.get(self.hug_api, '/api/products/ID')
         self.assertEqual(response_not_value.status, '400 Bad Request')
         self.assertIsNotNone(response_not_value.data.get('errors'))

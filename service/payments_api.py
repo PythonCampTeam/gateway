@@ -1,10 +1,12 @@
 import falcon
 import hug
 
-from gateway.integration import notifications_rpc, payment_rpc, shipping_rpc
-
-# from integration import products_rpc
-# import json
+from gateway.integration import (
+    notifications_rpc,
+    payment_rpc,
+    shipping_rpc,
+    products_rpc,
+)
 
 
 class PaymentAPI(object):
@@ -28,10 +30,9 @@ class PaymentAPI(object):
         Returns:
             Object of cart if success called
         """
-        # sku = products_rpc.get_sku_product(product_id)
-        # product = payment_rpc.add_in_cart(sku, quality)
-        product = payment_rpc.add_in_cart(product_id, quality)
-        return product
+        sku = products_rpc.get_sku_product(product_id)
+        cart = payment_rpc.add_in_cart(sku, quality)
+        return cart
 
     @hug.object.get('/api/cart/')
     def cart(self):
@@ -54,7 +55,8 @@ class PaymentAPI(object):
             Updated cart if successful, error message otherwise.
 
         """
-        product = payment_rpc.update_cart(product_id, quality)
+        sku = products_rpc.get_sku_product(product_id)
+        product = payment_rpc.update_cart(sku, quality)
         return product
 
     @hug.object.delete('/api/cart/delete/',
@@ -69,7 +71,8 @@ class PaymentAPI(object):
             Returns a message aboute delete if the call succeeded.
 
         """
-        product = payment_rpc.delete_item(product_id)
+        sku = products_rpc.get_sku_product(product_id)
+        product = payment_rpc.delete_item(sku)
         return product
 
     @hug.object.delete('/api/cart/delete_all/')
@@ -113,8 +116,7 @@ class PaymentAPI(object):
         self.mail_customer = response.get("email")
         self.phone_customer = response.get("phone")
         self.order = response.get("response")
-        return self.order, self.mail_customer, self.phone_customer,
-        self.upstream_id
+        return self.order, self.mail_customer, self.phone_customer
 
     @hug.object.put('/api/cart/shipping/')
     def selected_shipping_method(self, order_id, shipping_id):
@@ -127,11 +129,11 @@ class PaymentAPI(object):
         Return:
             order (dict): booking of customer
         """
-        order = payment_rpc.select_shipping(order_id, shipping_id)
-        return order
+        self.order = payment_rpc.select_shipping(order_id, shipping_id)
+        return self.order
 
     @hug.object.post('/api/cart/paid/')
-    def order_payd(self, order_id, cart):
+    def order_payd(self, order_id, cart="tok_visa"):
         """Change shipping method in Order.
 
         Args:
@@ -140,7 +142,6 @@ class PaymentAPI(object):
 
         Example:
             {
-            "order":"or_1AuHBMBqraFdOKT2PQySCVY5",
             "cart": "tok_mastercard"
             }
 
@@ -148,17 +149,19 @@ class PaymentAPI(object):
             order (dict): booking of customer
 
         """
-        order = payment_rpc.pay_order(order_id, cart)
-        if order.get("errors"):
-            return order.get("errors")
-        label = shipping_rpc.shipment_transaction(order.get("status"),
-                                                  order.get("upstream_id"),
-                                                  order.get("selected_shipping_method"))
+        order_paid = payment_rpc.pay_order(order_id, cart)
+        if order_paid.get("errors"):
+            return order_paid.get("errors")
+        shipping_method = order_paid.upstream_id
+        label = shipping_rpc.shipment_transaction(
+                                                 shipment_id=shipping_method,
+                                                 order=order_paid
+                                                 )
         data_mail = {"to_email": self.mail_customer,
                      "name": self.customer_name,
                      "label": label,
                      }
         data_sms = {"to_phone": self.phone_customer}
-        res1 = notifications_rpc.send_email(data_mail)
-        res2 = notifications_rpc.send_sms(data_sms)
-        return order, res1, res2, label
+        email = notifications_rpc.send_email(data_mail)
+        sms = notifications_rpc.send_sms(data_sms)
+        return order_paid, email, sms, label
