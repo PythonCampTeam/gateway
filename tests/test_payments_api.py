@@ -1,15 +1,24 @@
 import unittest
 from unittest.mock import MagicMock, patch
 import hug
-from service import server as api
-from service.payments_api import PaymentAPI
-from integration import payment_rpc
-import stripe
+from gateway.service import server as api
+# from gateway.service.payments_api import PaymentAPI
+import gateway.integration as g
+# from gateway.integration import (
+#     notifications_rpc,
+#     payment_rpc,
+#     shipping_rpc,
+#     products_rpc,
+# )
 
 
 class TestPayments(unittest.TestCase):
     def setUp(self):
         self.hug_api = api
+        # self.p = products_rpc
+        # self.n = notifications_rpc
+        # self.pay = payment_rpc
+        # self.s = shipping_rpc
         self.id1 = 'prod_BDQT7ifqt1FFc1'
         self.id2 = 'prod_BF2pHek9EyzO2S'
         self.id3 = 'prod_BF3PxrZrcpb09X'
@@ -29,62 +38,114 @@ class TestPayments(unittest.TestCase):
         self.body_pay = {"order_id": "or_1AuHBMBqraFdOKT2PQySCVY5",
                          "cart": "tok_mastercard"
                          }
+        self.body_ship = {"order_id": "or_1AuHBMBqraFdOKT2PQySCVY5",
+                          "shipping_id": "tok_mastercard"}
 
-    def test1(self):
-        test = hug.test.post(self.hug_api, '/api/cart/add/',
+    @patch('gateway.integration.products_rpc.get_sku_product',
+           return_value='200')
+    @patch('gateway.integration.payment_rpc.add_in_cart',
+           return_value='200')
+    def test_add_in_cart(self, mock1, mock2):
+        print('***********************')
+        test = hug.test.post(self.hug_api, '/api/products/ID/buy/',
                              params={"product_id": self.id1, "quality": 2})
-        print(test.data, test.status, '1')
+        self.assertEqual(test.status, '200 OK')
+        self.assertTrue(mock1.called)
+        self.assertTrue(mock2.called)
 
-    def test2(self):
-        hug.test.post(self.hug_api, '/api/cart/add/',
-                      params={"product_id": self.id1, "quality": 2})
-        test = hug.test.put(self.hug_api, '/api/cart/update/',
-                            params={"product_id": self.id1, "quality": 1})
-        print(test.data, test.status, '2')
-
-    def test3(self):
-        test = hug.test.get(self.hug_api, '/api/cart/')
-        print(test.data, test.status, '3')
-
-    def test11(self):
-        test = hug.test.post(self.hug_api, '/api/cart/chekout/',
+    def test_add_raise(self):
+        print('***********************')
+        test = hug.test.post(self.hug_api, '/api/products/ID/buy',
                              params={})
-        print(test.data, test.status, '4')
+        print(test.status)
+        self.assertEqual(test.status, '400 Bad Request')
 
-    def test4(self):
-        hug.test.post(self.hug_api, '/api/cart/add/',
-                      params={"product_id": self.id1, "quality": 2})
-        test = hug.test.delete(self.hug_api, '/api/cart/delete/',
+    @patch('gateway.integration.payment_rpc.get_cart',
+           return_value='200')
+    def test_cart(self, mock1):
+        print('***********************')
+        test = hug.test.get(self.hug_api, '/api/cart/')
+        self.assertEqual(test.status, '200 OK')
+        self.assertTrue(mock1.called)
+
+    @patch('gateway.integration.products_rpc.get_sku_product',
+           return_value='200')
+    @patch('gateway.integration.payment_rpc.update_cart',
+           return_value='200')
+    def test_update_cart(self, mock1, mock2):
+        print('***********************')
+        test = hug.test.put(self.hug_api, '/api/cart/update/',
+                            params={"product_id": self.id1, "quality": 2})
+        self.assertEqual(test.status, '200 OK')
+        self.assertTrue(mock1.called)
+        self.assertTrue(mock2.called)
+
+    def test_update_raise(self):
+        print('***********************')
+        test = hug.test.put(self.hug_api, '/api/cart/update/')
+        self.assertEqual(test.status, '400 Bad Request')
+        print(test.status)
+
+    @patch('gateway.integration.products_rpc.get_sku_product',
+           return_value='200')
+    @patch('gateway.integration.payment_rpc.delete_item',
+           return_value='200')
+    def test_delete_item(self, mock1, mock2):
+        print('***********************')
+        test = hug.test.delete(self.hug_api, '/api/cart/ID/',
                                params={"product_id": self.id1})
-        print(test.data, test.status, '5')
+        self.assertEqual(test.status, '200 OK')
+        self.assertTrue(mock1.called)
+        self.assertTrue(mock2.called)
+        print(test.status)
 
-    def test_mocke_order(self):
+    def test_delete_item_raise(self):
+        print('***********************')
+        test = hug.test.delete(self.hug_api, '/api/cart/ID/')
+        self.assertEqual(test.status, '400 Bad Request')
+        print(test.status)
 
-        payment_rpc.new_order = MagicMock(return_value='200')
+    @patch('gateway.integration.payment_rpc.delete_cart',
+           return_value='200')
+    def test_delete_cart_raise(self, mock1):
+        print('***********************')
+        test = hug.test.delete(self.hug_api, '/api/cart/')
+        self.assertEqual(test.status, '200 OK')
+        self.assertTrue(mock1.called)
+        print(test.status)
+
+    @patch('gateway.integration.payment_rpc.new_order',
+           return_value={"error": None})
+    def test_checkout(self, mock1):
+        print('***********************')
         test = hug.test.post(self.hug_api, '/api/cart/chekout/',
-                             params=self.body_order)
-        print(test.data, test.status, '6')
+                               body=self.body_order)
+        self.assertEqual(test.status, '200 OK')
+        self.assertTrue(mock1.called)
+        print(test.status)
 
-    def test_mock_pay(self):
-        payment_rpc.order_payd = MagicMock(return_value='200')
-        test = hug.test.post(self.hug_api, '/api/cart/paid/',
-                             params=self.body_pay)
-        print(test.data, test.status, '7')
-
-    def test_mock_select(self):
-        payment_rpc.select_shipping = MagicMock(return_value='200')
+    @patch('gateway.integration.payment_rpc.select_shipping',
+           return_value='200')
+    def test_selected_shipping_method(self, mock1):
+        print('***********************')
         test = hug.test.put(self.hug_api, '/api/cart/shipping/',
-                            params={"order_id": '11test', "shipping_id": "11test"})
-        print(test.data, test.status, '9')
+                            body=self.body_ship)
+        self.assertEqual(test.status, '200 OK')
+        self.assertTrue(mock1.called)
+        print(test.status)
 
-    def test5(self):
-        test = hug.test.delete(self.hug_api, '/api/cart/delete_all/')
-        print(test.data, test.status, '8')
-
-    def tearDown(self):
-        test = hug.test.delete(self.hug_api, '/api/cart/delete_all/')
-        print(test.data, test.status, '8')
-
+    # @patch('gateway.integration.payment_rpc.pay_order',
+    #        return_value='200')
+    # @patch('gateway.integration.shipping_rpc.shipment_transaction',
+    #        return_value='label')
+    # def test_order_payd(self, mock1, mock2):
+    #     print('***********************')
+    #     test = hug.test.post(self.hug_api, '/api/cart/paid/',
+    #                         body=self.body_order)
+    #     self.assertEqual(test.status, '200 OK')
+    #     self.assertTrue(mock1.called)
+    #     self.assertTrue(mock2.called)
+    #     print(test.status, test)
 
 if __name__ == '__main__':
     unittest.main()
