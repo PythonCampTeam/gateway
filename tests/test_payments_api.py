@@ -1,10 +1,9 @@
 import unittest
 from unittest.mock import MagicMock, patch
 import hug
-from service import server as api
-from service.payments_api import PaymentAPI
-from integration import payment_rpc
-import stripe
+from gateway.service import server as api
+from gateway.service.payments_api import PaymentAPI
+from gateway.integration import payment_rpc
 
 
 class TestPayments(unittest.TestCase):
