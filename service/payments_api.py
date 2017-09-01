@@ -103,7 +103,6 @@ class PaymentAPI(object):
                     "postal_code":"95122"
                         }
                 }
-
         Returns:
              Object of order if successful, error message otherwise.
 
@@ -158,11 +157,17 @@ class PaymentAPI(object):
                                                  shipment_id=shipping_method,
                                                  order=order_paid
                                                  )
-        data_mail = {"to_email": self.mail_customer,
-                     "name": self.customer_name,
-                     "label": label,
-                     }
-        data_sms = {"to_phone": self.phone_customer}
-        email = notifications_rpc.send_email(data_mail)
-        sms = notifications_rpc.send_sms(data_sms)
+        from_email = "test@example.com"
+        subject = "You order send"
+        email = notifications_rpc.send_email(
+                                             self.mail_customer,
+                                             label,
+                                             from_email,
+                                             subject,
+                                             self.customer_name
+                                             )
+        sms = notifications_rpc.send_sms(
+                                         self.phone_customer,
+                                         subject
+                                        )
         return order_paid, email, sms, label
