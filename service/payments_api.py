@@ -116,6 +116,7 @@ class PaymentAPI(object):
         self.mail_customer = response.get("email")
         self.phone_customer = response.get("phone")
         self.order = response.get("response")
+        self.customer_name = response.get("name")
         return self.order, self.mail_customer, self.phone_customer
 
     @hug.object.put('/api/cart/shipping/')
