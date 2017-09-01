@@ -20,6 +20,7 @@ class PaymentAPI(object):
     mail_customer = ''
     phone_customer = ''
     order = None
+    customer_name = 'Vasya'
 
     @hug.object.post('/api/products/ID/buy/')
     def add_in_cart(self, product_id: hug.types.text,
@@ -152,7 +153,7 @@ class PaymentAPI(object):
         order_paid = payment_rpc.pay_order(order_id, cart)
         if order_paid.get("errors"):
             return order_paid.get("errors")
-        shipping_method = order_paid.upstream_id
+        shipping_method = order_paid.get('upstream_id')
         label = shipping_rpc.shipment_transaction(
                                                  shipment_id=shipping_method,
                                                  order=order_paid
