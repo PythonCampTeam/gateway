@@ -1,11 +1,11 @@
 # import falcon
 import hug
-import nameko
 
 from gateway.integration import notifications_rpc
 
 
 class NotificationsAPI(object):
+    """Class for sended notifications for Customer"""
 
     @hug.object.post('/api/notifications/email/')
     def send_email(self, to_email: hug.types.text,
@@ -38,7 +38,10 @@ class NotificationsAPI(object):
                  content: hug.types.text="Your Order is ready"):
         """This method send SMS to a customer and notify him
         Args:
-            body (dict): contain fields: to_phone, content
+            number (str): number of customer. Number can be valid.
+            content (str): message in sms
+        Return:
+            state(dict): return starus code of response
         """
         # if number is None:
         #     return {"code": falcon.HTTP_400,
@@ -46,8 +49,3 @@ class NotificationsAPI(object):
         #             "Required fields number"}
         state = notifications_rpc.send_sms(number, content)
         return state
-
-    @hug.exception(nameko.exceptions.RemoteError)
-    def handle_exception(exception):
-        """Handles the provided exception for testing"""
-        return {"messages": "O_o"}

@@ -113,7 +113,7 @@ class TestPayments(unittest.TestCase):
     def test_checkout(self, mock1):
         print('***********************')
         test = hug.test.post(self.hug_api, '/api/cart/chekout/',
-                               body=self.body_order)
+                             body=self.body_order)
         self.assertEqual(test.status, '200 OK')
         self.assertTrue(mock1.called)
         print(test.status)
@@ -159,6 +159,7 @@ class TestPayments(unittest.TestCase):
     #     self.assertTrue(mock1.called)
     #     self.assertTrue(mock2.called)
     #     print(test.status, test)
+
 
 if __name__ == '__main__':
     unittest.main()
