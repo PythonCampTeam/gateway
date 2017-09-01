@@ -1,5 +1,7 @@
 import unittest
+
 import hug
+
 from gateway.service import server as api
 
 

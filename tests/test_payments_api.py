@@ -1,24 +1,15 @@
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
+
 import hug
+import stripe
+
 from gateway.service import server as api
-# from gateway.service.payments_api import PaymentAPI
-import gateway.integration as g
-# from gateway.integration import (
-#     notifications_rpc,
-#     payment_rpc,
-#     shipping_rpc,
-#     products_rpc,
-# )
 
 
 class TestPayments(unittest.TestCase):
     def setUp(self):
         self.hug_api = api
-        # self.p = products_rpc
-        # self.n = notifications_rpc
-        # self.pay = payment_rpc
-        # self.s = shipping_rpc
         self.id1 = 'prod_BDQT7ifqt1FFc1'
         self.id2 = 'prod_BF2pHek9EyzO2S'
         self.id3 = 'prod_BF3PxrZrcpb09X'
@@ -36,10 +27,13 @@ class TestPayments(unittest.TestCase):
                     }
             }
         self.body_pay = {"order_id": "or_1AuHBMBqraFdOKT2PQySCVY5",
-                         "cart": "tok_mastercard"
+                         "cart": "tok_mastercard",
+                         "upstream_id": "23425"
                          }
         self.body_ship = {"order_id": "or_1AuHBMBqraFdOKT2PQySCVY5",
                           "shipping_id": "tok_mastercard"}
+        self.order = stripe.StripeObject().construct_from(
+                              self.body_pay, '')
 
     @patch('gateway.integration.products_rpc.get_sku_product',
            return_value='200')
@@ -132,6 +126,25 @@ class TestPayments(unittest.TestCase):
                             body=self.body_ship)
         self.assertEqual(test.status, '200 OK')
         self.assertTrue(mock1.called)
+        print(test.status)
+
+    @patch('gateway.integration.payment_rpc.pay_order')
+    @patch('gateway.integration.shipping_rpc.shipment_transaction',
+           return_value={"upstream_id": 'id_11111'})
+    @patch('gateway.integration.notifications_rpc.send_email',
+           return_value='200')
+    @patch('gateway.integration.notifications_rpc.send_sms',
+           return_value='200')
+    def test_order_payd(self, mock1, mock2, mock3, mock4):
+        print('***********************')
+        mock4.return_value = self.order
+        test = hug.test.post(self.hug_api, '/api/cart/paid/',
+                             params=self.body_pay)
+        self.assertEqual(test.status, '200 OK')
+        self.assertTrue(mock1.called)
+        self.assertTrue(mock2.called)
+        self.assertTrue(mock3.called)
+        self.assertTrue(mock3.called)
         print(test.status)
 
     # @patch('gateway.integration.payment_rpc.pay_order',

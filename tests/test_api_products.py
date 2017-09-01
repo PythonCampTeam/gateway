@@ -1,10 +1,13 @@
-import hug
 import unittest
-from gateway.service import server as api
+from unittest.mock import MagicMock
+
+import hug
+
 from gateway.integration import products_rpc
+from gateway.service import server as api
+
 # import stripe
 
-from unittest.mock import MagicMock
 
 
 class ProductsAPITest(unittest.TestCase):
@@ -57,9 +60,24 @@ class ProductsAPITest(unittest.TestCase):
         self.assertEqual(response_not_value.status, '400 Bad Request')
         self.assertIsNotNone(response_not_value.data.get('errors'))
         print("Test delete product check")
-        # print("delete_product check")
-        # print(ss.data, ss.status)
-        # print("Mock delete_product check")
+
+    def test_delete_product_raise(self):
+        """Test for checking true delete product"""
+        self.rpc.delete_product = MagicMock(return_value='200')
+        response_correct = hug.test.delete(
+                                           self.hug_api,
+                                           '/api/products/ID',
+                                           id_product='prod_BIMKqJuS6bHLnX'
+                                           )
+        self.assertEqual(response_correct.status, '200 OK')
+        self.assertEqual(response_correct.data, '200')
+        self.assertTrue(self.rpc.delete_product.called)
+
+        response_not_value = hug.test.delete(self.hug_api, '/api/products/ID',
+                                             params={})
+        self.assertEqual(response_not_value.status, '400 Bad Request')
+        self.assertIsNotNone(response_not_value.data.get('errors'))
+        print("Test delete product check")
 
     def test_search_products(self):
         """Test for checking sort product"""
