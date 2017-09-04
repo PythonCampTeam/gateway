@@ -1,11 +1,6 @@
 from operator import getitem
 from nameko.standalone.rpc import ClusterRpcProxy
-# try:
-#     from config.settings.common import security as security_settings
-# except ImportError:
-#     from gateway.config.settings.common import security as security_settings
-
-AMQP_CONFIG = {'AMQP_URI': "amqp://guest:guest@rabbit"}
+from gateway.config.settings.common import security as security_settings
 
 
 class ServiceRPC(object):
@@ -22,7 +17,7 @@ class ServiceRPC(object):
         ...{"id": 42}
     """
     def __init__(self, service_name=None):
-        self.rpc_cluster = ClusterRpcProxy(AMQP_CONFIG)
+        self.rpc_cluster = ClusterRpcProxy(security_settings.AMQP_CONFIG)
         self.service_name = service_name
         self.rpc_proxy = self.rpc_cluster.start()
 

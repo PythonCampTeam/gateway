@@ -1,10 +1,10 @@
-import hug
 import unittest
-from gateway.service import server as api
-from gateway.integration import products_rpc
-# import stripe
-
 from unittest.mock import MagicMock
+
+import hug
+
+from gateway.integration import products_rpc
+from gateway.service import server as api
 
 
 class ProductsAPITest(unittest.TestCase):

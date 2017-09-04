@@ -11,4 +11,4 @@ done
 
 # Run the service
 echo ${PYTHONPATH}
-uwsgi --http 0.0.0.0:8000 --wsgi-file service/server.py --callable __hug_wsgi__
+uwsgi --http 0.0.0.0:8000 --wsgi-file service/server.py --callable __hug_wsgi__ --workers 5

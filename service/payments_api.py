@@ -1,20 +1,18 @@
 import falcon
 import hug
 
-from gateway.integration import (
-    notifications_rpc,
-    payment_rpc,
-    shipping_rpc,
-    products_rpc,
-)
+from gateway.integration import (notifications_rpc, payment_rpc, products_rpc,
+                                 shipping_rpc)
 
 
 class PaymentAPI(object):
     """Class for created requests and worked with objects Payments
+
     Args:
         mail_customer(string) email of customer
         phone_customer(string) phone of customer
         order_customer (object) order of customer
+        customer_name (string) name of customer
         """
 
     mail_customer = ''
@@ -26,10 +24,13 @@ class PaymentAPI(object):
     def add_in_cart(self, product_id: hug.types.text,
                     quality: int):
         """Method put product in cart, with quantity
+
         Args:
             body(dict) body request
+
         Returns:
             Object of cart if success called
+
         """
         sku = products_rpc.get_sku_product(product_id)
         cart = payment_rpc.add_in_cart(sku, quality)
@@ -143,6 +144,7 @@ class PaymentAPI(object):
 
         Example:
             {
+            "order_id": "or_adahj4344"
             "cart": "tok_mastercard"
             }
 
