@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import patch
 
+from unittest.mock import patch
 import hug
 
 from gateway.service import server as api
