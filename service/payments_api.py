@@ -18,7 +18,7 @@ class PaymentAPI(object):
     mail_customer = ''
     phone_customer = ''
     order = None
-    customer_name = 'Vasya'
+    customer_name = 'Customer'
 
     @hug.object.post('/api/products/ID/buy/')
     def add_in_cart(self, product_id: hug.types.text,
@@ -26,7 +26,9 @@ class PaymentAPI(object):
         """Method put product in cart, with quantity
 
         Args:
-            body(dict) body request
+            product_id (string): uniq id of product,
+                                 which added in cart.
+            quantity (int): quantity of product in cart
 
         Returns:
             Object of cart if success called
@@ -51,7 +53,9 @@ class PaymentAPI(object):
         """Update quantity of given product in the cart
 
         Args:
-            body(dist) parameters for update cart
+            product_id (string): uniq id of product,
+                                 which added in cart.
+            quantity (int): quantity of product in cart
 
         Return:
             Updated cart if successful, error message otherwise.
@@ -79,7 +83,10 @@ class PaymentAPI(object):
 
     @hug.object.delete('/api/cart/')
     def delete_all(self):
-        """Delete all products from the cart"""
+        """Delete all products from the cart
+        Return:
+            Returns a current cart after delete.
+        """
         return payment_rpc.delete_cart()
 
     @hug.object.post('/api/cart/chekout/')
@@ -87,9 +94,9 @@ class PaymentAPI(object):
         """Create a order
 
         Args:
-            body(dist) parameter for order. Contain
-            email, phone, name and adress of customer.
-            response (dist) result creating order
+            body(dist): Parameters for order. Contain
+                       email, phone, name and adress of customer.
+            response (dict): Result of creating order.
 
         Example:
             body = {
@@ -125,7 +132,9 @@ class PaymentAPI(object):
         """Change shipping method in Order.
 
         Args:
-            body (dict): parameters for update order
+            product_id (string): uniq id of product,
+                                 which added in cart.
+            shipping_id (string): Id of selected shipping.
 
 
         Return:
@@ -135,12 +144,12 @@ class PaymentAPI(object):
         return self.order
 
     @hug.object.post('/api/cart/paid/')
-    def order_payd(self, order_id, cart="tok_visa"):
+    def order_paid(self, order_id, card="tok_visa"):
         """Change shipping method in Order.
 
         Args:
-            body (dict): parameters for update order.
-            Body contain id of order and cart
+            order_id (string): Parameters for update order.
+            сard (string): Token of card of customet.
 
         Example:
             {
@@ -149,10 +158,10 @@ class PaymentAPI(object):
             }
 
         Return:
-            order (dict): booking of customer
+            order (dict): Booking of customer with status "paid".
 
         """
-        order_paid = payment_rpc.pay_order(order_id, cart)
+        order_paid = payment_rpc.pay_order(order_id, card)
         if order_paid.get("errors"):
             return order_paid.get("errors")
         shipping_method = order_paid.get('upstream_id')
