@@ -20,15 +20,16 @@ class PaymentAPI(object):
     order = None
     customer_name = 'Customer'
 
-    @hug.object.post('/api/products/ID/buy/')
+    @hug.object.post('/api/product/{product_id}/buy/',
+                     examples='prod_BBs1U1qwftIUs9')
     def add_in_cart(self, product_id: hug.types.text,
-                    quality: int):
+                    quality: hug.types.number):
         """Method put product in cart, with quantity
 
         Args:
             product_id (string): uniq id of product,
                                  which added in cart.
-            quantity (int): quantity of product in cart
+            quality (int): quantity of product in cart
 
         Returns:
             Object of cart if success called
@@ -47,9 +48,10 @@ class PaymentAPI(object):
         """
         return payment_rpc.get_cart()
 
-    @hug.object.put('/api/cart/update/')
+    @hug.object.put('/api/cart/{product_id}/',
+                    examples='prod_BBs1U1qwftIUs9')
     def update_cart(self, product_id: hug.types.text,
-                    quality: int):
+                    quality: hug.types.number):
         """Update quantity of given product in the cart
 
         Args:
@@ -65,8 +67,8 @@ class PaymentAPI(object):
         product = payment_rpc.update_cart(sku, quality)
         return product
 
-    @hug.object.delete('/api/cart/ID/',
-                       examples='product_id=prod_BBs1U1qwftIUs9')
+    @hug.object.delete('/api/cart/{product_id}/',
+                       examples='prod_BBs1U1qwftIUs9')
     def delete_item(self, product_id: hug.types.text):
         """Delete product from the cart
 
@@ -128,12 +130,12 @@ class PaymentAPI(object):
         return self.order, self.mail_customer, self.phone_customer
 
     @hug.object.put('/api/cart/shipping/')
-    def selected_shipping_method(self, order_id, shipping_id):
+    def selected_shipping_method(self, order_id: hug.types.text,
+                                 shipping_id: hug.types.text):
         """Change shipping method in Order.
 
         Args:
-            product_id (string): uniq id of product,
-                                 which added in cart.
+            order_id (string): Uniq id of customer order.
             shipping_id (string): Id of selected shipping.
 
 
@@ -144,7 +146,8 @@ class PaymentAPI(object):
         return self.order
 
     @hug.object.post('/api/cart/paid/')
-    def order_paid(self, order_id, card="tok_visa"):
+    def order_paid(self, order_id: hug.types.text,
+                   card: hug.types.text="tok_visa"):
         """Change shipping method in Order.
 
         Args:
@@ -166,20 +169,13 @@ class PaymentAPI(object):
             return order_paid.get("errors")
         shipping_method = order_paid.get('upstream_id')
         label = shipping_rpc.shipment_transaction(
-                                                 shipment_id=shipping_method,
-                                                 order=order_paid
-                                                 )
-        from_email = "test@example.com"
-        subject = "You order send"
+            shipment_id=shipping_method,
+            order=order_paid,
+        )
         email = notifications_rpc.send_email(
-                                             self.mail_customer,
-                                             label,
-                                             from_email,
-                                             subject,
-                                             self.customer_name
-                                             )
-        sms = notifications_rpc.send_sms(
-                                         self.phone_customer,
-                                         subject
-                                        )
+            self.mail_customer,
+            label,
+            self.customer_name
+        )
+        sms = notifications_rpc.send_sms(self.phone_customer)
         return order_paid, email, sms, label
