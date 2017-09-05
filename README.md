@@ -1,6 +1,6 @@
-### Micro-services
+## Micro-services
 Simple product e-commerce set of micro services (list products, buy, checkout, shipping, notifications), which are capable to communicate between themselves in order to achieve loose coupling.
-# Micro-services uses a number of open source projects to work properly:
+#### Micro-services uses a number of open source projects to work properly:
   - [Hug API](https://github.com/timothycrosley/hug)
   - [Cerberus](https://github.com/pyeve/cerberus)
   - [Nameko](https://github.com/nameko/nameko-examples)
@@ -8,12 +8,15 @@ Simple product e-commerce set of micro services (list products, buy, checkout, s
   - [Twilio](https://github.com/twilio/twilio-python)
   - [Sendgrid](https://github.com/sendgrid/sendgrid-python)
   - [Stripe](https://github.com/stripe/stripe-python)
-
-#### Products
-#### Payments
-#### Order
-
-
+  - [docker-compose](https://github.com/docker/compose)
+  - [Docker](https://github.com/docker)
+ ### Installation and start
+Download or copy to yourself sh [file](https://yadi.sk/d/S55ue6f53McPtm)
+Run this commands in directory, where will be stored "Micro-services"
+```sh
+chmod ugo+x install_run_project
+./install_run_project
+```
 
 #### Services "Products"
 ***
@@ -28,8 +31,16 @@ This service performs functions:
   -  Retrieve list of products with sorted and filter
   -  Delete product by id
   -  Get information about product by id
+### Tech
 
-### Create new products
+Products microservice uses a Stripe free account:
+
+* [Stripe](https://stripe.com/) - This library allows to quickly and easily use the Stripe API v3 via Python.
+
+Products microservice itself is open source with a [public repository](https://github.com/PythonCampTeam/products) on GitHub.
+
+#### API endpoints
+#### Create new products
 
 Examples post request
 ```sh
@@ -60,7 +71,7 @@ POST /api/products/
 ```
 Returns a product object if the call succeeded.
 See example [responce](https://stripe.com/docs/api#create_product)
-### Update product
+#### Update product
 Examples put request
 ```sh
 PUT /api/products/{id_product}
@@ -74,14 +85,14 @@ PUT /api/products/{id_product}
 ```
 Returns the product object if the update succeeded.
 See example [responce](https://stripe.com/docs/api#update_product)
-### Retrieve list of products with sorted and filter
+#### Retrieve list of products with sorted and filter
 Examples get request
 ```sh
 GET /api/products/?category=toys&order_by=name
 ```
 The category parameter serves not only to filter the list, but also to search for a keyword.
 See example [responce](https://stripe.com/docs/api#list_products)
-### Delete product by id
+#### Delete product by id
 ```sh
 DELETE /api/products/{id_product}
 ```
@@ -92,37 +103,27 @@ See example [responce](https://stripe.com/docs/api#delete_product)
 
 
 #### Notifications
+***
 This microservice send notification by email and by SMS.
-
   - Using account in Twilio for send sms.
   - Using account in Sendgrid for send emails.
 
-# Expected API endpoints
-
-  - **POST /api/notifications/email/**
-  Send an email to customer and notify him. JSON payload contain fields: *to_email*, *subject*, *content*, *from_email*. Send emails in HTML format.
-  - **POST /api/notifications/sms/**
-Send SMS to a customer and notify him. JSON payload contain fields: *to_phone*, *content*.
-
-
 This service performs functions:
   - Send sms to customer with information of status of order.
-  - Send email to customer with information about order(label, cart and other).
-
+  - Send email to customer with information about order(label, cart and other)  in HTML format.
+***
 ### Tech
 
-Notifications microservice uses a number of open source projects to work properly:
+Notifications microservice uses a Sendgrid free account and free Twilio account:
 
 * [Sengrid](https://sendgrid.com/) - This library allows to quickly and easily use the SendGrid Web API v3 via Python.
 * [Twilio](https://www.twilio.com/) - Library for easily send sms via Python.
-* [Nameko](http://nameko.readthedocs.io/en/stable/) - A microservices framework for Python that lets service developers concentrate on application logic and encourages testability.
-* [Hug](https://github.com/timothycrosley/hug) - Hug aims to make developing Python driven APIs as simple as possible, but no simpler.
 
-And of course Notifications microservice itself is open source with a [public repository][dill]
- on GitHub.
+Notifications microservice itself is open source with a [public repository](https://github.com/PythonCampTeam/notifications) on GitHub.
 
+#### API endpoints
  ### Sending mail
-
+JSON payload contain fields: to_email, subject, content, from_email
  Examples post request
  ```sh
  POST /api/notifications/email/
@@ -143,6 +144,7 @@ Response
 ```
 
 ### Sending sms
+JSON payload contain fields: to_phone, content.
  Examples post request
  ```sh
  POST /api/notifications/sms/
@@ -153,169 +155,141 @@ Response
     "content": "Your order is ready!"
 }
 ```
-### Installation
 
 
-Install the dependencies and devDependencies and start the server.
-
-```sh
-$ cd dillinger
-$ npm install -d
-$ node app
-```
-
-For production environments...
-
-```sh
-$ npm install --production
-$ NODE_ENV=production node app
-```
-
-### Docker TODO
-Dillinger is very easy to install and deploy in a Docker container.
-
-By default, the Docker will expose port 8080, so change this within the Dockerfile if necessary. When ready, simply use the Dockerfile to build the image.
-
-```sh
-cd dillinger
-docker build -t joemccann/dillinger:${package.json.version}
-```
-This will create the dillinger image and pull in the necessary dependencies. Be sure to swap out `${package.json.version}` with the actual version of Dillinger.
-
-Once done, run the Docker image and map the port to whatever you wish on your host. In this example, we simply map port 8000 of the host to port 8080 of the Docker (or whatever port was exposed in the Dockerfile):
-
-```sh
-docker run -d -p 8000:8080 --restart="always" <youruser>/dillinger:${package.json.version}
-```
-
-Verify the deployment by navigating to your server address in your preferred browser.
-
-```sh
-127.0.0.1:8000
-```
-
-
-### Todos
-
- - Write MORE Tests
-
-License
-----
-
-MIT
-
-
-**Free Software, Hell Yeah!**This microservice send notification by email and by SMS.
-
-  - Using account in Twilio for send sms.
-  - Using account in Sendgrid for send emails.
-
-# Expected API endpoints
-
-  - **POST /api/notifications/email/**
-  Send an email to customer and notify him. JSON payload contain fields: *to_email*, *subject*, *content*, *from_email*. Send emails in HTML format.
-  - **POST /api/notifications/sms/**
-Send SMS to a customer and notify him. JSON payload contain fields: *to_phone*, *content*.
-
-
+### Payments
+Service that implements shopping cart with an in-memory database for products added to the cart and integrates with Stripe to process payments for a purchase of products.
 This service performs functions:
-  - Send sms to customer with information of status of order.
-  - Send email to customer with information about order(label, cart and other).
+ - Put product in cart, with quantity
+ - Get all products in cart
+ - Update quantity of given product in the cart
+ - Delete product from the cart
+ - Delete all products from the cart
+ - Сreate order
+ - Paid order
+ - Change shipping method for order
 
 ### Tech
 
-Notifications microservice uses a number of open source projects to work properly:
-
-* [Sengrid](https://sendgrid.com/) - This library allows to quickly and easily use the SendGrid Web API v3 via Python.
-* [Twilio](https://www.twilio.com/) - Library for easily send sms via Python.
-* [Nameko](http://nameko.readthedocs.io/en/stable/) - A microservices framework for Python that lets service developers concentrate on application logic and encourages testability.
-* [Hug](https://github.com/timothycrosley/hug) - Hug aims to make developing Python driven APIs as simple as possible, but no simpler.
-
-And of course Notifications microservice itself is open source with a [public repository][dill]
- on GitHub.
-
- ### Sending mail
-
+Payments microservice uses a Sendgrid all the above-mentioned microservices.
+Database is in-memory dict.
+Payments microservice itself is open source with a [public repository](https://github.com/PythonCampTeam/payments) on GitHub.
+#### API endpoints
+#### Add product in cart
  Examples post request
  ```sh
- POST /api/notifications/email/
- ```
-
-
- ```sh
- {
-	"to_email": "tamara.malysheva@saritasa.com",
-	"from_email": "test@example.com",
-	"subject" : "blabla",
-	"content" : "content"
-}
-```
-Response
-```sh
-{"status code": "202"}
-```
-
-### Sending sms
- Examples post request
- ```sh
- POST /api/notifications/sms/
+POST /api/cart/prod_BByyzCWSMmhL7R/buy/
  ```
  ```sh
  {
-    "number": +79994413746,
-    "content": "Your order is ready!"
+	"quality": 5
 }
 ```
-### Installation
-
-
-Install the dependencies and devDependencies and start the server.
-
+Response - return all cart
 ```sh
-$ cd dillinger
-$ npm install -d
-$ node app
+[
+    {
+      "type":'sku',
+      "parent":'sku_BLHJWGDdPXTClG',
+      "quality": 5
+    }
+  ]
 ```
-
-For production environments...
-
+#### Update product in cart
+ Examples post request
+ ```sh
+PUT /api/cart/prod_BByyzCWSMmhL7R/
+ ```
+ ```sh
+ {
+	"quality": 1
+}
+```
+Response - return all cart with update product
 ```sh
-$ npm install --production
-$ NODE_ENV=production node app
+[
+    {
+      "type":'sku',
+      "parent":'sku_BLHJWGDdPXTClG',
+      "quality": 1
+    }
+  ]
 ```
-
-### Docker TODO
-Dillinger is very easy to install and deploy in a Docker container.
-
-By default, the Docker will expose port 8080, so change this within the Dockerfile if necessary. When ready, simply use the Dockerfile to build the image.
-
+#### Delete product in cart
+ Examples post request
+ ```sh
+DELETE /api/cart/prod_BByyzCWSMmhL7R/
+ ```
+Response - return cart without this product
 ```sh
-cd dillinger
-docker build -t joemccann/dillinger:${package.json.version}
+[]
 ```
-This will create the dillinger image and pull in the necessary dependencies. Be sure to swap out `${package.json.version}` with the actual version of Dillinger.
-
-Once done, run the Docker image and map the port to whatever you wish on your host. In this example, we simply map port 8000 of the host to port 8080 of the Docker (or whatever port was exposed in the Dockerfile):
-
+#### Get cart
+ Examples post request
+ ```sh
+GET /api/cart/
+ ```
+Response - return all  cart
 ```sh
-docker run -d -p 8000:8080 --restart="always" <youruser>/dillinger:${package.json.version}
+[
+    {
+      "type":'sku',
+      "parent":'sku_BLHJWGDdPXTClG',
+      "quality": 1
+    }
+  ]
 ```
-
-Verify the deployment by navigating to your server address in your preferred browser.
-
+#### Delete all  cart
+ Examples post request
+ ```sh
+DELETE /api/cart/
+ ```
+Response - return empty cart
 ```sh
-127.0.0.1:8000
+[]
 ```
+#### Create order
+ Examples post request
+ ```sh
+POST /api/cart/checkout/
+ ```
+  ```sh
+{
+   "email": "varvara.malysheva@saritasa.com",
+   "phone": "+79994413746",
+   "name": "Chloe Taylor",
 
-
-### Todos
-
- - Write MORE Tests
-
-License
-----
-
-MIT
-
-
-**Free Software, Hell Yeah!**
+   "address":{
+      "line1":"1092 Indian Summer Ct",
+      "city":"San Jose",
+      "state":"CA",
+      "country": "US",
+      "postal_code":"95122"
+   }
+}
+ ```
+Response - [the order object](https://stripe.com/docs/api/python#order_object)
+#### Change shipping method
+ Examples post request
+ ```sh
+POST /api/cart/shipping/
+ ```
+```sh
+{
+   "order_id": "or_1AxW4eBqraFdOKT2HIrPPf3m",
+   "shipping_id": "e5d1b5f1101949d29271256d0159558f"
+}
+ ```
+Response - [the order object](https://stripe.com/docs/api/python#update_order)
+#### Paid order
+ Examples post request
+ ```sh
+POST /api/cart/paid/
+ ```
+```sh
+{
+            "order_id": "or_1AxW4eBqraFdOKT2HIrPPf3m"
+            "cart": "tok_mastercard"
+}
+ ```
+Response - [the order object](https://stripe.com/docs/api/python#pay_order) with update status "paid", status code of send email and sms
