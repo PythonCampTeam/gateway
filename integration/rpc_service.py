@@ -1,6 +1,6 @@
-from nameko.standalone.rpc import ClusterRpcProxy
 from operator import getitem
-from config.settings.common import security as security_settings
+from nameko.standalone.rpc import ClusterRpcProxy
+from gateway.config.settings.common import security as security_settings
 
 
 class ServiceRPC(object):
@@ -16,17 +16,14 @@ class ServiceRPC(object):
             needed_method(id=42)
         ...{"id": 42}
     """
-    def __init__(self, **kwargs):
-        self.rpc_proxy = ClusterRpcProxy(security_settings.AMQP_CONFIG)
-        self.service_name = kwargs.get('service_name')
+    def __init__(self, service_name=None):
+        self.rpc_cluster = ClusterRpcProxy(security_settings.AMQP_CONFIG)
+        self.service_name = service_name
+        self.rpc_proxy = self.rpc_cluster.start()
 
-    def method_rpc(self, **kwargs):
-        self.rpc_proxy = self.rpc_proxy.start()
-        service_method = kwargs.get('method_name')
-        service = getitem(self.rpc_proxy, self.service_name)
-        return getattr(service, service_method)
-
-rpc_service = ServiceRPC(service_name='ShippingRPC')
-# here init methods for use
-rpc_method = rpc_service.method_rpc(method_name='service_state')
-
+    def method_rpc(self, method_name=None):
+        if method_name:
+            service = getitem(self.rpc_proxy, self.service_name)
+            return getattr(service, method_name)
+        else:
+            raise AttributeError('The attribute method_name will not empty')

@@ -1,7 +1,10 @@
+import json
+from http import HTTPStatus
+
 import hug
-from nameko.standalone.rpc import ClusterRpcProxy
-from config.settings.common import security as security_settings
-from integration import rpc_service
+
+from gateway.integration import shipping_rpc
+from gateway.service.error_shipping import err_excaptions
 
 
 class ShippingAPI(object):
@@ -14,40 +17,62 @@ class ShippingAPI(object):
         category(str): string name category of products
         """
 
-    @hug.object.get('/api/products',
-                    examples='name=NoteBook&category=Dell')
-    def shipments(self, name: str):
-        with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
-            state = rpc.ShippingRPC.service_state(name=name)
-            state2 = rpc.ShipingRPC.__doc__
-        return {name: state, '42': state2}
-
-    @hug.object.get('/api/ship')
+    @hug.object.get('/api/shipments/state')
     def ship(self, **kwargs):
 
-        return rpc_service.rpc_method(name=kwargs)
+        return json.loads(shipping_rpc.service_state(name=kwargs))
 
-    @hug.object.post('/api/shipments/{ID}',
-                     examples='id=shipments_id&shipments=DHL')
-    def shipments_add(self, **kwargs):
-        new_shipments = kwargs.get('ID')
-        return {'id': new_shipments, 'body': kwargs.get('body')}
+    @hug.object.post('/api/shipments')
+    def shipments_callback(self, order=None):
+        """ method work with stripe service when create order
+        and answer rates of shipment
+        Kwargs(dict): data item of order
+        Return:
+            dict: with order data updated rates and create shipments
+        """
+        order_update = shipping_rpc.shipping_order_update.call_async(order)
+        print(order_update)
+        return order_update.result()
 
     @hug.object.get('/api/shipments')
-    def shipments_list(self):
+    def shipments_list(self, order_by=None, hug_session=None, ):
         """function return lists of shipments"""
-        return {}
+        if order_by:
+            return shipping_rpc.shipping_get(order_by=order_by)
 
-    @hug.object.get('/api/shipments/{ID}/currency/{CURRENCY}',
-                    example='id=cart&currency=USD')
-    def shipments_rates(self, **kwargs):
-        sh_id = kwargs.get('ID')
-        sh_currency = kwargs.get('CURRENCY')
+        data = shipping_rpc.shipping_get(order_by=None)
+        if data:
+            print(len(data), '#####')
+            return data
+        raise err_excaptions.RatesError('Broken nah')
+
+    @hug.object.get('/api/shipments/{object_id}/rates/{currency}')
+    def shipments_rates(self,
+                        session: hug.directives.session,
+                        object_id=None,
+                        currency=None):
         """ function return rate for the shipment"""
-        return {'id': sh_id, 'sh_currency': sh_currency}
+        shipments_id = object_id
+        shipments_currency = currency
+        print(object_id, '#' * 85)
 
-    @hug.object.get('/api/shipments/{ID}/label', example='id=cart_id')
-    def shipments_label(self, **kwargs):
+        rates_result = shipping_rpc.shipping_get_rates(
+                                    object_id=shipments_id,
+                                    object_currency=shipments_currency)
+
+        if rates_result:
+            rates_result = json.loads(rates_result)
+            if all(rates_result.values()):
+                return rates_result
+        raise Exception(session)
+
+    @hug.object.get('/api/shipment/{object_id}/label')
+    def shipments_label(self,
+                        session: hug.directives.session,
+                        object_id=None):
         """function generate shipping label"""
-        return {}
-
+        if object_id:
+            label = shipping_rpc.shipping_get_label(object_id=object_id)
+            if label:
+                return label
+        raise err_excaptions.LabelNotCreated('The label not created')

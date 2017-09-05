@@ -20,7 +20,6 @@ services:
     ports:
       - "8000:8000"
     networks:
-      - front
       - backend
     command: ./run.sh
 
@@ -31,9 +30,8 @@ services:
       - RABBIT_PORT=5672
       - RABBIT_MANAGEMENT_PORT=15672
       - SETTINGS_MODULE=gateway
-      - PYTHONPATH=${PYTHONPATH}:/gateway
+      - PYTHONPATH=${PYTHONPATH}:/
 
 networks:
   backend:
     driver: bridge
-  front:

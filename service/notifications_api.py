@@ -1,31 +1,36 @@
 import hug
-from nameko.standalone.rpc import ClusterRpcProxy
-from config.settings.common import security as security_settings
+
+from gateway.integration import notifications_rpc
 
 
 class NotificationsAPI(object):
-    @hug.object.get('/api/notifications',
-                    examples='name=NoteBook&category=Dell')
-    def shipments(self, name: str):
-        with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
-            state = rpc.NotificationsRPC.testing(name=name)
-            state2 = rpc.NotificationsRPC.__doc__
-        return {name: state, '42': state2}
+    """Class for sended notifications for Customer"""
 
-    @hug.object.post('/api/notifications/email/send')
-    def send_email(self, body):
-        # to_email = kwargs.get("email")
-        convert = dict(body)
-        email = convert.get("email")
-        with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
-            state = rpc.NotificationsRPC.send_email(email)
+    @hug.object.post('/api/notifications/email/')
+    def send_email(self, to_email: hug.types.text,
+                   label: hug.types.text,
+                   name: hug.types.text = "Customer",
+                   ):
+        """This method send an email to customer and notify him.
+        Args:
+            to_emails (str) : email of customer
+            name (str): name of customer
+            label (str): link to label of shipping
+        Return:
+            state (dict): return starus code of response
+        """
+        state = notifications_rpc.send_email(to_email, label, name)
         return state
 
-    @hug.object.post('/api/notifications/sms/send')
-    def send_sms(self, body):
-        # number = kwargs.get("number")
-        convert = dict(body)
-        number = convert.get("number")
-        with ClusterRpcProxy(security_settings.AMQP_CONFIG) as rpc:
-            state = rpc.NotificationsRPC.send_sms(number)
+    @hug.object.post('/api/notifications/sms/')
+    def send_sms(self, number: hug.types.text='+79994413746',
+                 content: hug.types.text="Your Order is ready"):
+        """This method send SMS to a customer and notify him
+        Args:
+            number (str): number of customer. Number can be valid.
+            content (str): message in sms
+        Return:
+            state(dict): return starus code of response
+        """
+        state = notifications_rpc.send_sms(number, content)
         return state
