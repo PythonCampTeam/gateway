@@ -127,10 +127,8 @@ JSON payload contain fields: to_email, subject, content, from_email
  Examples post request
  ```sh
  POST /api/notifications/email/
- ```
-
-
- ```sh
+```
+```sh
  {
 	"to_email": "tamara.malysheva@saritasa.com",
 	"from_email": "test@example.com",
@@ -155,9 +153,302 @@ JSON payload contain fields: to_phone, content.
     "content": "Your order is ready!"
 }
 ```
+### Shipping
+Service to create shipments over well-known carriers (like fedex or usps, dhl etc).
+This service performs functions:
+ - Create new shipment
+ - List of existing shipments, stored in list of dicts
+ - Get rate for the shipment
+ - Generate shipping label
 
+### Tech
+Shipping microservice uses a  free account of Shippo
+ - [Shippo](goshippo.com) shipping for platforms, marketplaces and ecommerce
 
-### Payments
+### API endpoints
+### Create new shipment
+ Method work with stripe service when create order
+ ```sh
+POST /api/shipments/
+ ```
+Example [query](https://stripe.com/docs/orders/dynamic-shipping-taxes#order-creation-event)
+Returns the order data updated rates and create shipments
+```sh
+
+  {
+        "id": "or_1AyepaBqraFdOKT2ahMQkRsd",
+        "object": "order",
+        "amount": 446,
+        "amount_returned": null,
+        "application": null,
+        "application_fee": null,
+        "charge": null,
+        "created": 1504609378,
+        "currency": "usd",
+        "customer": null,
+        "email": "varvara.malysheva@saritasa.com",
+        "items": [
+            {
+                "object": "order_item",
+                "amount": 100,
+                "currency": "usd",
+                "description": "Wally pick",
+                "parent": "sku_BLL1Ah7Wbdv2Zg",
+                "quantity": 2,
+                "type": "sku"
+            },
+            {
+                "object": "order_item",
+                "amount": 0,
+                "currency": "usd",
+                "description": "Taxes (included)",
+                "parent": null,
+                "quantity": null,
+                "type": "tax"
+            },
+            {
+                "object": "order_item",
+                "amount": 346,
+                "currency": "usd",
+                "description": "First-Class Package/Mail Parcel",
+                "parent": "8da5b27dfd87444cb752e63a378469d0",
+                "quantity": null,
+                "type": "shipping"
+            }
+        ],
+        "livemode": false,
+        "metadata": {},
+        "returns": {
+            "object": "list",
+            "data": [],
+            "has_more": false,
+            "total_count": 0,
+            "url": "/v1/order_returns?order=or_1AyepaBqraFdOKT2ahMQkRsd"
+        },
+        "selected_shipping_method": "8da5b27dfd87444cb752e63a378469d0",
+        "shipping": {
+            "address": {
+                "city": "San Jose",
+                "country": "US",
+                "line1": "1092 Indian Summer Ct",
+                "line2": null,
+                "postal_code": "95122",
+                "state": "CA"
+            },
+            "carrier": null,
+            "name": "Chloe Taylor",
+            "phone": null,
+            "tracking_number": null
+        },
+        "shipping_methods": [
+            {
+                "id": "8da5b27dfd87444cb752e63a378469d0",
+                "amount": 346,
+                "currency": "usd",
+                "delivery_estimate": {
+                    "date": "2017-08-28",
+                    "type": "exact"
+                },
+                "description": "First-Class Package/Mail Parcel"
+            },
+            {
+                "id": "8da5b27dfd87444cb752e63a378469d0",
+                "amount": 346,
+                "currency": "usd",
+                "delivery_estimate": {
+                    "date": "2017-08-28",
+                    "type": "exact"
+                },
+                "description": "First-Class Package/Mail Parcel"
+            },
+            {
+                "id": "8da5b27dfd87444cb752e63a378469d0",
+                "amount": 346,
+                "currency": "usd",
+                "delivery_estimate": {
+                    "date": "2017-08-28",
+                    "type": "exact"
+                },
+                "description": "First-Class Package/Mail Parcel"
+            },
+            {
+                "id": "8da5b27dfd87444cb752e63a378469d0",
+                "amount": 346,
+                "currency": "usd",
+                "delivery_estimate": {
+                    "date": "2017-08-28",
+                    "type": "exact"
+                },
+                "description": "First-Class Package/Mail Parcel"
+            }
+        ],
+        "status": "created",
+        "status_transitions": {
+            "canceled": null,
+            "fulfiled": null,
+            "paid": null,
+            "returned": null
+        },
+        "updated": 1504609382,
+        "upstream_id": "1bd3fc762b69458491aea5fcb665dfc5"
+    }
+```
+### Get list of existing shipments
+Get request
+```sh
+GET /api/shipments/
+```
+Example response
+```sh
+[
+    {
+        "object_id": "1bd3fc762b69458491aea5fcb665dfc5",
+        "address_to": {
+            "name": "Chloe Taylor",
+            "street1": "1092 Indian Summer Ct",
+            "city": "San Jose",
+            "state": "CA",
+            "zip": "95122",
+            "country": "US",
+            "phone": null,
+            "email": "varvara.malysheva@saritasa.com"
+        }
+    }
+]
+```
+### Get rate for the shipment
+Example request
+```sh
+GET /api/shipments/ID/rates/usd
+```
+Example response
+```sh
+{
+    "object_id": "07712983ea1d45709c86e4d4d644e735",
+    "rate_items": [
+        {
+            "object_id": "45006edb7a9d43e68ec2fe9faf99fa0e",
+            "arrives_by": null,
+            "zone": "1",
+            "object_owner": "varvara.malysheva@saritasa.com",
+            "provider_image_200": "https://shippo-static.s3.amazonaws.com/providers/200/USPS.png",
+            "currency_local": "USD",
+            "attributes": [
+                "FASTEST"
+            ],
+            "currency": "USD",
+            "amount": "21.18",
+            "duration_terms": "Overnight delivery to most U.S. locations.",
+            "servicelevel": {
+                "name": "Priority Mail Express",
+                "token": "usps_priority_express",
+                "terms": ""
+            },
+            "provider_image_75": "https://shippo-static.s3.amazonaws.com/providers/75/USPS.png",
+            "object_created": "2017-09-05T12:20:36.546Z",
+            "shipment": "07712983ea1d45709c86e4d4d644e735",
+            "estimated_days": 1,
+            "test": true,
+            "amount_local": "21.18",
+            "messages": [],
+            "provider": "USPS",
+            "carrier_account": "c7d72d2025f740d89bdfb00f33c5d67a"
+        },
+        {
+            "object_id": "c0716801a9c648e2a6f167aab639dcfb",
+            "arrives_by": null,
+            "zone": "1",
+            "object_owner": "varvara.malysheva@saritasa.com",
+            "provider_image_200": "https://shippo-static.s3.amazonaws.com/providers/200/USPS.png",
+            "currency_local": "USD",
+            "attributes": [],
+            "currency": "USD",
+            "amount": "5.84",
+            "duration_terms": "Delivery within 1, 2, or 3 days based on where your package started and where it’s being sent.",
+            "servicelevel": {
+                "name": "Priority Mail",
+                "token": "usps_priority",
+                "terms": ""
+            },
+            "provider_image_75": "https://shippo-static.s3.amazonaws.com/providers/75/USPS.png",
+            "object_created": "2017-09-05T12:20:36.545Z",
+            "shipment": "07712983ea1d45709c86e4d4d644e735",
+            "estimated_days": 2,
+            "test": true,
+            "amount_local": "5.84",
+            "messages": [],
+            "provider": "USPS",
+            "carrier_account": "c7d72d2025f740d89bdfb00f33c5d67a"
+        },
+        {
+            "object_id": "9777ec3a50164246981e5e3e1f2f6873",
+            "arrives_by": null,
+            "zone": "1",
+            "object_owner": "varvara.malysheva@saritasa.com",
+            "provider_image_200": "https://shippo-static.s3.amazonaws.com/providers/200/USPS.png",
+            "currency_local": "USD",
+            "attributes": [],
+            "currency": "USD",
+            "amount": "5.95",
+            "duration_terms": "Delivery in 2 to 8 days.",
+            "servicelevel": {
+                "name": "Parcel Select",
+                "token": "usps_parcel_select",
+                "terms": ""
+            },
+            "provider_image_75": "https://shippo-static.s3.amazonaws.com/providers/75/USPS.png",
+            "object_created": "2017-09-05T12:20:36.544Z",
+            "shipment": "07712983ea1d45709c86e4d4d644e735",
+            "estimated_days": 7,
+            "test": true,
+            "amount_local": "5.95",
+            "messages": [],
+            "provider": "USPS",
+            "carrier_account": "c7d72d2025f740d89bdfb00f33c5d67a"
+        },
+        {
+            "object_id": "876b49492f2a4a2b8f0ec7445874606c",
+            "arrives_by": null,
+            "zone": "1",
+            "object_owner": "varvara.malysheva@saritasa.com",
+            "provider_image_200": "https://shippo-static.s3.amazonaws.com/providers/200/USPS.png",
+            "currency_local": "USD",
+            "attributes": [
+                "BESTVALUE",
+                "CHEAPEST"
+            ],
+            "currency": "USD",
+            "amount": "3.46",
+            "duration_terms": "",
+            "servicelevel": {
+                "name": "First-Class Package/Mail Parcel",
+                "token": "usps_first",
+                "terms": ""
+            },
+            "provider_image_75": "https://shippo-static.s3.amazonaws.com/providers/75/USPS.png",
+            "object_created": "2017-09-05T12:20:36.544Z",
+            "shipment": "07712983ea1d45709c86e4d4d644e735",
+            "estimated_days": 5,
+            "test": true,
+            "amount_local": "3.46",
+            "messages": [],
+            "provider": "USPS",
+            "carrier_account": "c7d72d2025f740d89bdfb00f33c5d67a"
+        }
+    ]
+}
+```
+### Get rate for the shipment
+Example request
+```sh
+GET /api/shipments/ID/label/
+```
+Example response, return link on paid order
+```sh
+https://shippo-delivery-east.s3.amazonaws.com/4ad1e7a441e443359deda0b6c82a5a34.pdf?Signature=V98Pp9VeNFKUl90zsBrDhHIM50I%3D&Expires=1536151544&AWSAccessKeyId=AKIAJGLCC5MYLLWIG42A
+```
+### Payments & Cart
+
 Service that implements shopping cart with an in-memory database for products added to the cart and integrates with Stripe to process payments for a purchase of products.
 This service performs functions:
  - Put product in cart, with quantity
@@ -176,11 +467,11 @@ Database is in-memory dict.
 Payments microservice itself is open source with a [public repository](https://github.com/PythonCampTeam/payments) on GitHub.
 #### API endpoints
 #### Add product in cart
- Examples post request
- ```sh
+Examples post request
+```sh
 POST /api/cart/prod_BByyzCWSMmhL7R/buy/
- ```
- ```sh
+```
+```sh
  {
 	"quality": 5
 }
@@ -196,11 +487,11 @@ Response - return all cart
   ]
 ```
 #### Update product in cart
- Examples post request
- ```sh
+Examples post request
+```sh
 PUT /api/cart/prod_BByyzCWSMmhL7R/
- ```
- ```sh
+```
+```sh
  {
 	"quality": 1
 }
@@ -216,7 +507,7 @@ Response - return all cart with update product
   ]
 ```
 #### Delete product in cart
- Examples post request
+Examples delete request
  ```sh
 DELETE /api/cart/prod_BByyzCWSMmhL7R/
  ```
@@ -225,7 +516,7 @@ Response - return cart without this product
 []
 ```
 #### Get cart
- Examples post request
+ Examples get request
  ```sh
 GET /api/cart/
  ```
@@ -240,7 +531,7 @@ Response - return all  cart
   ]
 ```
 #### Delete all  cart
- Examples post request
+ Examples delete request
  ```sh
 DELETE /api/cart/
  ```
@@ -250,10 +541,10 @@ Response - return empty cart
 ```
 #### Create order
  Examples post request
- ```sh
+```sh
 POST /api/cart/checkout/
- ```
-  ```sh
+```
+```sh
 {
    "email": "varvara.malysheva@saritasa.com",
    "phone": "+79994413746",
@@ -271,25 +562,26 @@ POST /api/cart/checkout/
 Response - [the order object](https://stripe.com/docs/api/python#order_object)
 #### Change shipping method
  Examples post request
- ```sh
+```sh
 POST /api/cart/shipping/
- ```
+```
 ```sh
 {
    "order_id": "or_1AxW4eBqraFdOKT2HIrPPf3m",
    "shipping_id": "e5d1b5f1101949d29271256d0159558f"
 }
- ```
+```
 Response - [the order object](https://stripe.com/docs/api/python#update_order)
 #### Paid order
+If the order is successfully paid, the SMS and email notification is sent
  Examples post request
- ```sh
+```sh
 POST /api/cart/paid/
- ```
+```
 ```sh
 {
             "order_id": "or_1AxW4eBqraFdOKT2HIrPPf3m"
             "cart": "tok_mastercard"
 }
- ```
+```
 Response - [the order object](https://stripe.com/docs/api/python#pay_order) with update status "paid", status code of send email and sms
