@@ -10,23 +10,18 @@ class NotificationsAPI(object):
     @hug.object.post('/api/notifications/email/')
     def send_email(self, to_email: hug.types.text,
                    label: hug.types.text,
-                   from_email: hug.types.text="test@example.com",
-                   subject: hug.types.text = "PythonCamp ZooShop",
                    name: hug.types.text = "Customer",
                    ):
         """This method send an email to customer and notify him.
         Args:
             to_emails (str) : email of customer
-            from_emails(str): email of shop
-            subject (str): subject of mail
             name (str): name of customer
             label (str): link to label of shipping
         Return:
             state (dict): return starus code of response
 
         """
-        state = notifications_rpc.send_email(to_email, label,
-                                             from_email, subject, name)
+        state = notifications_rpc.send_email(to_email, label, name)
         return state
 
     @hug.object.post('/api/notifications/sms/')

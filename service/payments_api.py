@@ -172,10 +172,11 @@ class PaymentAPI(object):
             shipment_id=shipping_method,
             order=order_paid,
         )
-        email = notifications_rpc.send_email(
+        email = notifications_rpc.send_email_with_temp(
             self.mail_customer,
+            self.customer_name,
             label,
-            self.customer_name
+            self.order,
         )
         sms = notifications_rpc.send_sms(self.phone_customer)
         return order_paid, email, sms, label
