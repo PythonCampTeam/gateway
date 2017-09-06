@@ -1,8 +1,12 @@
 import falcon
 import hug
-
+import cerberus
+from gateway.service import validate
 from gateway.integration import (notifications_rpc, payment_rpc, products_rpc,
                                  shipping_rpc)
+
+Validator = cerberus.Validator
+v = Validator()
 
 
 class PaymentAPI(object):
@@ -120,14 +124,13 @@ class PaymentAPI(object):
         """
         if body is None or body == {}:
             return falcon.HTTP_400
+        if not v.validate(body, validate.schema_order):
+            return v.errors
+        self.mail_customer = body.get('email')
+        self.phone_customer = body.get('phone')
+        self.customer_name = body.get('name')
         response = payment_rpc.new_order(body)
-        if response.get("error"):
-            return response.get("error")
-        self.mail_customer = response.get("email")
-        self.phone_customer = response.get("phone")
-        self.order = response.get("response")
-        self.customer_name = response.get("name")
-        return self.order, self.mail_customer, self.phone_customer
+        return response
 
     @hug.object.put('/api/cart/shipping/')
     def selected_shipping_method(self, order_id: hug.types.text,
@@ -142,27 +145,23 @@ class PaymentAPI(object):
         Return:
             order (dict): booking of customer
         """
-        self.order = payment_rpc.select_shipping(order_id, shipping_id)
-        return self.order
+        order = payment_rpc.select_shipping(order_id, shipping_id)
+        return order
 
     @hug.object.post('/api/cart/paid/')
     def order_paid(self, order_id: hug.types.text,
                    card: hug.types.text="tok_visa"):
         """Change shipping method in Order.
-
         Args:
             order_id (string): Parameters for update order.
             сard (string): Token of card of customet.
-
         Example:
             {
             "order_id": "or_adahj4344"
             "cart": "tok_mastercard"
             }
-
         Return:
             order (dict): Booking of customer with status "paid".
-
         """
         order_paid = payment_rpc.pay_order(order_id, card)
         if order_paid.get("errors"):
@@ -172,11 +171,11 @@ class PaymentAPI(object):
             shipment_id=shipping_method,
             order=order_paid,
         )
-        email = notifications_rpc.send_email_with_temp(
+        notifications_rpc.send_email_with_temp(
             self.mail_customer,
-            self.customer_name,
             label,
-            self.order,
+            self.customer_name,
+            order_paid,
         )
-        sms = notifications_rpc.send_sms(self.phone_customer)
-        return order_paid, email, sms, label
+        notifications_rpc.send_sms(self.phone_customer)
+        return order_paid

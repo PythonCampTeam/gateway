@@ -22,3 +22,4 @@ uWSGI==2.0.15
 Werkzeug==0.12.2
 wrapt==1.10.11
 falcon==1.2.0
+Cerberus==1.1
