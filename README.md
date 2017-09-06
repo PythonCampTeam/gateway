@@ -14,8 +14,8 @@ Simple product e-commerce set of micro services (list products, buy, checkout, s
 Download or copy to yourself sh [file](https://yadi.sk/d/S55ue6f53McPtm)
 Run this commands in directory, where will be stored "Micro-services"
 ```sh
-chmod ugo+x install_run_project
-./install_run_project
+$ chmod ugo+x install_run_project
+$ ./install_run_project
 ```
 
 #### Services "Products"
@@ -445,7 +445,10 @@ GET /api/shipments/ID/label/
 ```
 Example response, return link on paid order
 ```sh
-https://shippo-delivery-east.s3.amazonaws.com/4ad1e7a441e443359deda0b6c82a5a34.pdf?Signature=V98Pp9VeNFKUl90zsBrDhHIM50I%3D&Expires=1536151544&AWSAccessKeyId=AKIAJGLCC5MYLLWIG42A
+{
+    "object_id": "75d6fd77d64b4e969c6635dade379e5c",
+    "label_url": "https://shippo-delivery-east.s3.amazonaws.com/9b4f93ccbd7a40c383a6cbfdbbca0c8e.pdf?Signature=wVtYerQ4YOVyq2%2Ft5gzK7ae4z%2BI%3D&Expires=1536153158&AWSAccessKeyId=AKIAJGLCC5MYLLWIG42A"
+}
 ```
 ### Payments & Cart
 
