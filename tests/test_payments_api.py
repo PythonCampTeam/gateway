@@ -147,18 +147,7 @@ class TestPayments(unittest.TestCase):
         self.assertTrue(mock3.called)
         print(test.status)
 
-    # @patch('gateway.integration.payment_rpc.pay_order',
-    #        return_value='200')
-    # @patch('gateway.integration.shipping_rpc.shipment_transaction',
-    #        return_value='label')
-    # def test_order_payd(self, mock1, mock2):
-    #     print('***********************')
-    #     test = hug.test.post(self.hug_api, '/api/cart/paid/',
-    #                         body=self.body_order)
-    #     self.assertEqual(test.status, '200 OK')
-    #     self.assertTrue(mock1.called)
-    #     self.assertTrue(mock2.called)
-    #     print(test.status, test)
+
 
 
 if __name__ == '__main__':

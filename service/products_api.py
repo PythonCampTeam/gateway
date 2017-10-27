@@ -7,8 +7,8 @@ from gateway.integration import products_rpc
 class ProductsAPI(object):
     """Class for created objects Products and worked with them """
 
-    @hug.object.get('/api/products/ID',
-                    examples='id_product=prod_BBZJ2ka5SKzKn7')
+    @hug.object.get('/api/products/{id_product}',
+                    examples='prod_BBZJ2ka5SKzKn7')
     def products_id(self, id_product):
         """Connect to stripe and obtain information about product
 
@@ -43,8 +43,8 @@ class ProductsAPI(object):
         product = products_rpc.search_products(category, order_by, decs)
         return product
 
-    @hug.object.delete('/api/products/ID',
-                       examples='id_product=prod_BBs1U1qwftIUs9')
+    @hug.object.delete('/api/products/{id_product}',
+                       examples='prod_BBZJ2ka5SKzKn7')
     def product_delete(self, id_product):
         """Connect to stripe and delete product
 
@@ -72,6 +72,29 @@ class ProductsAPI(object):
                                       shipping purposes
             metadata (hash) Set of key/value pairs that you can attach to
                             an object. Use as category
+        Examples:
+            {
+            "name": "Wally bone",
+            "description" : "The best gift for your pet",
+            "attributes" : ["manufacturer",
+                                "material"],
+            "package_dimensions" :  {"height": 5.0, "length": 5.0,
+                                     "weight": 5.0, "width": 5.0},
+            "metadata": {
+            "category": "food",
+            "for": "cats",
+            "type": "fish"
+            },
+            "attributes_sku": {
+            "manufacturer": "PetHappy",
+            "material": "rubber"},
+            "price": 50,
+            "inventory":{
+            "type": "finite",
+            "quantity": 500
+            }
+            }
+
         Returns:
             Returns a product object if the call succeeded.
 
@@ -86,12 +109,21 @@ class ProductsAPI(object):
         product = products_rpc.create_product(body)
         return product
 
-    @hug.object.put('/api/products/ID')
+    @hug.object.put('/api/products/{id_product}',
+                    examples='id_product=prod_BIGqFhje3MbsHc')
     def product_update(self, id_product, body=None):
         """Updates the product
 
         Args:
             body: (dict) The parameter to update.
+
+        Examples:
+            { "metadata":
+               {"category":
+               "toys", "for":
+               "dogs", "type": "bone"},
+               "name": "Test_put"
+               }
 
         Returns:
             Returns the product object if the update succeeded.
