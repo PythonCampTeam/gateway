@@ -19,7 +19,7 @@ requests==2.18.4
 six==1.10.0
 urllib3==1.22
 uWSGI==2.0.15
-Werkzeug==0.12.2
+Werkzeug==0.15.3
 wrapt==1.10.11
 falcon==1.2.0
 Cerberus==1.1
